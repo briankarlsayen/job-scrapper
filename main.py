@@ -41,4 +41,5 @@ remove_keywords = ["devops",  "servicenow", "qa", "quality assurance", "data", "
 filtered_df = df[~df["title"].str.contains("|".join(remove_keywords), case=False, na=False)]
 
 # create a csv jobs_today.csv
+print('filtered jobs: ', len(filtered_df))
 filtered_df.to_csv("jobs_today.csv",  sep=';', index=False)
