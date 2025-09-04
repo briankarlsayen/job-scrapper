@@ -1,0 +1,5 @@
+Develop and maintain the front end of web applications using Angular
+Design and implement reusable and modular components using Angular.
+Collaborate with backend engineers to design and integrate APIs.
+Conduct code reviews to ensure code quality and adherence to best practices
+Write unit, integration, and end-to-end tests to ensure the quality and reliability of the front end codebase

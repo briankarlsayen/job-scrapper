@@ -1,0 +1,9 @@
+Implement frontend features using React.js and JavaScript based on the provided specifications
+Follow established coding conventions, patterns, and architectural guidelines
+Conduct thorough manual QA and testing of implemented features before submission
+Read and understand detailed requirements, asking clarifying questions when needed
+Collaborate with the lead engineer to ensure seamless integration with existing systems
+Write clean, maintainable code that adheres to Applause's engineering standards
+Participate in code reviews with a focus on learning and consistency
+Debug and troubleshoot issues methodically and thoroughly
+Document implementation details and testing procedures as needed
