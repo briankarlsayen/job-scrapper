@@ -27,29 +27,35 @@ seen_links = set()
 duplicates = 0
 PAGE_LIMIT = 10
 page_item_count = 25
+separator = "================================================================"
+
 
 today = date.today()
 formatted_date = today.strftime("%Y_%m_%d")
+job_requirement_list = []
 
-def extract_section(soup, headers):
-    """
-    Extracts the <ul><li> list under the first matching header.
+# def extract_section(soup, headers):
+#     """
+#     Extracts the <ul><li> list under the first matching header.
 
-    :param soup: BeautifulSoup object
-    :param headers: list of keywords/phrases to search (case-insensitive)
-    :return: list of strings (requirements), or empty list if not found
-    """
-    # Look for any tag that contains one of the headers
-    header_tag = soup.find(
-        lambda tag: tag.name in ["h2", "h3", "h4", "p", "strong"]
-        and any(h.lower() in tag.get_text(strip=True).lower() for h in headers)
-    )
+#     :param soup: BeautifulSoup object
+#     :param headers: list of keywords/phrases to search (case-insensitive)
+#     :return: list of strings (requirements), or empty list if not found
+#     """
+#     results = set()  # use set to avoid duplicates
 
-    if header_tag:
-        ul = header_tag.find_next("ul")
-        if ul:
-            return [li.get_text(strip=True) for li in ul.find_all("li")]
-    return []
+#     header_tags = soup.find_all(
+#         lambda tag: tag.name in ["h2", "h3", "h4", "p", "strong"]
+#         and any(h.lower() in tag.get_text(strip=True).lower() for h in headers)
+#     )
+
+#     for header_tag in header_tags:
+#         ul = header_tag.find_next("ul")
+#         if ul:
+#             for li in ul.find_all("li"):
+#                 results.add(li.get_text(strip=True))  # set keeps only unique
+
+#     return list(results)
 
 # def extract_section(driver, headers):
 #     header_tags = driver.find_elements(By.CSS_SELECTOR, "h2, h3, h4, p, strong")
@@ -67,19 +73,38 @@ def extract_section(soup, headers):
 #                 continue  # no <ul> after this header, keep searching
 #     return []
 
+def extract_section(container, headers):
+    if not container:
+        return []
+
+    results = set()
+
+    header_tag = container.find(
+        lambda tag: tag.name in ["h2", "h3", "h4", "p", "strong"]
+        and any(h.lower() in tag.get_text(strip=True).lower() for h in headers)
+    )
+
+    if not header_tag:
+        return []
+
+    for sibling in header_tag.find_all_next():
+        if sibling.name in ["button"]:
+            break  # stop at next section header
+
+        if sibling.name == "ul":
+            for li in sibling.find_all("li"):
+                text = li.get_text(strip=True)
+                if text:  # skip empty
+                    results.add(text)
+
+    return list(results)
+
 
 while True:
-
     BASE_URL = f"https://www.linkedin.com/jobs/search?keywords=Software%20Engineer&location=Philippines&geoId=103121230&f_TPR=r86400&f_WT=3%2C2&position=1"
-    # BASE_URL = f"https://www.linkedin.com/jobs/search/?f_TPR=r86400&f_WT=2%2C3&geoId=103121230&keywords=Web%20Developer&location=Philippines&start={page*page_item_count}"
-    # BASE_URL = f"https://www.linkedin.com/jobs/search?keywords=Web%20Developer&location=Philippines&geoId=103121230&f_TPR=r86400&f_WT=2%2C3&position=1&pageNum={page}"
-    print('BASE_URL', BASE_URL)
-
     driver.get(BASE_URL)
     time.sleep(3) 
     wait = WebDriverWait(driver, 10)
-
-    
 
     close_button = ""
     try:
@@ -93,7 +118,6 @@ while True:
         close_button.click()
         print("Login modal closed ✅")
     except Exception as e:
-        # break
         # driver.execute_script("arguments[0].click();", close_button)
         print("No modal or not clickable:", e)
         # break
@@ -107,90 +131,62 @@ while True:
 
     print('Unfiltered jobs: ', len(job_cards))
 
+    requirement_datas = []
+
     for job in job_cards:
         time.sleep(1)
 
-        if items >= 5: # limit to first 5
-            break
+        # if items >= 5: # limit to first 5
+        #     break
 
         title_tag = job.find_element(By.CSS_SELECTOR, "h3.base-search-card__title")
         title_text = title_tag.text.strip()
-        print('title_text', title_text)
 
         if not validate_job_title(title_text):
             continue
 
-        print('valid title: ', title_text)
-
+        print('Job Title: ', title_text)
         
         job.click()
         items += 1 
 
         time.sleep(8)
 
-        # print('job_card', job_cards[0])
         soup = BeautifulSoup(driver.page_source, "html.parser")
         job_description = soup.select_one("div.show-more-less-html__markup")
 
-        # job_description_tag = driver.find_element(By.CSS_SELECTOR, "div.show-more-less-html__markup")
-        # job_description = job_description_tag.text.strip()
-        print('job_description', job_description)
-
-
-        requirement_headers = ["requirements", "qualifications", "must have", "skills required", "responsibilities"]
+        requirement_headers = ["qualification", "require", 
+                               "must have", "skills", "responsibilities",
+                               "what you will bring to the team", "about you",
+                               "what we’re looking for"
+                               ]
         nice_to_have_headers = ["nice to have", "preferred", "bonus points"]
+        headers = requirement_headers + nice_to_have_headers
 
-        requirement_list = extract_section(job_description, requirement_headers)
-        nice_to_have_list = extract_section(job_description, nice_to_have_headers)
-
-        print('requirement_list', requirement_list)
-        print('nice_to_have_list', nice_to_have_list)
+        requirement_list = extract_section(job_description, headers)
 
         link_tag = job.find_element(By.CSS_SELECTOR, "a.base-card__full-link")
         job_link = link_tag.get_attribute("href") if link_tag else ""
         raw_link = job_link.split("?position")[0] if job_link else ""
-        print('raw', raw_link)
-        # text = job_description.get_text(separator="\n", strip=True)
-        # save_to_textfile(f"job_req_{formatted_date}.txt", "\n".join(requirement_list))
-        # save_to_textfile(f"job_nice_{formatted_date}.txt", "\n".join(nice_to_have_list))
 
         required_skills = skill_extraction("\n".join(requirement_list))
-        nth_skills = skill_extraction("\n".join(nice_to_have_list))
-        # save_to_textfile("skills_req.txt", "\n".join(required_skills))
-        # save_to_textfile("skill_nth.txt", "\n".join(nth_skills))
 
-    
-
-        # company_tag = job.find("h4", {"class": "base-search-card__subtitle"})
-        # location_tag = job.find("span", {"class": "job-search-card__location"})
-        # date_tag = job.find("time", {"class": "job-search-card__listdate--new"})
-        # link_tag = job.find("a", {"class": "base-card__full-link"})
-        # job_link = link_tag.get("href") if title_tag else ""
-        # raw_link=job_link.split("?position")[0]
-
-        # ✅ Company
         company_tag = job.find_element(By.CSS_SELECTOR, "h4.base-search-card__subtitle")
         company_text = company_tag.text.strip()
-
-        # ✅ Location
         location_tag = job.find_element(By.CSS_SELECTOR, "span.job-search-card__location")
         location_text = location_tag.text.strip()
-
-        # ✅ Date
-        # date_tag = job.find_element(By.CSS_SELECTOR, "time.job-search-card__listdate--new")
-        # date_text = date_tag.text.strip()  # "2025-08-29" style
-
-        # ✅ Link
         link_tag = job.find_element(By.CSS_SELECTOR, "a.base-card__full-link")
         job_link = link_tag.get_attribute("href") if link_tag else ""
         raw_link = job_link.split("?position")[0] if job_link else ""
-
-
 
         if raw_link in seen_links:
             duplicates +=1
             continue  # Skip duplicate
         seen_links.add(raw_link)
+
+        job_requirement_list.extend(["Title: " + title_text, "Company: " + company_text, "Link: " + raw_link, "Requirements:"])
+        job_requirement_list.extend(requirement_list)
+        job_requirement_list.append(separator)
 
         jobs.append({
             "title": title_text if title_tag else "",
@@ -201,9 +197,7 @@ while True:
             "scraped_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             "job_link": raw_link if raw_link else "",
             "required_skills": ",".join(required_skills) if len(required_skills) else "",
-            "nth_skills": ",".join(nth_skills) if len(nth_skills) else "",
         })
-    break
     page += 1
 
     if duplicates >= 5:
@@ -213,6 +207,8 @@ while True:
         break
 
 driver.quit()
+
+save_to_textfile(f"job_req_{formatted_date}.txt", "\n".join(job_requirement_list))
 
 # Save to CSV
 folder_path = "datas"

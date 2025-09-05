@@ -2,15 +2,19 @@ from typing import List
 import spacy
 from spacy.matcher import PhraseMatcher
 import json
+import re
+
+def insert_spaces_with_skills(text: str, skills: List[str]) -> str:
+    """Ensure skills from dictionary are separated by spaces."""
+    fixed = text
+    for skill in sorted(skills, key=len, reverse=True):  # longest first
+        if len(skill) < 3:  # skip very short skills
+            continue
+        pattern = re.compile(re.escape(skill), re.IGNORECASE)
+        fixed = pattern.sub(f" {skill} ", fixed)
+    return " ".join(fixed.split())  # normalize spaces
 
 def save_to_textfile(filename: str, content: str, mode: str = "w") -> None:
-    """
-    Save text content to a file.
-
-    :param filename: Name or path of the text file (e.g., "jobs.txt" or "./data/jobs.txt").
-    :param content: The string content you want to save.
-    :param mode: File mode - "w" = overwrite, "a" = append.
-    """
     try:
         with open(filename, mode, encoding="utf-8") as f:
             f.write(content + "\n")
@@ -22,19 +26,34 @@ def skill_extraction(content: str) -> List[str]:
     # Load skills from JSON
     with open("skills.json", "r") as f:
         skills_dict = json.load(f)
+    with open("normalize_skills.json", "r") as f:
+        normalize_skills_dict = json.load(f)
         
     skills = [skill for category in skills_dict.values() for skill in category]
+
+    cleaned_content = insert_spaces_with_skills(content, skills)
+
     nlp = spacy.load("en_core_web_sm")
     matcher = PhraseMatcher(nlp.vocab, attr="LOWER")
 
     patterns = [nlp.make_doc(skill) for skill in skills]
     matcher.add("SKILL", patterns)
-    doc = nlp(content)
+    doc = nlp(cleaned_content)
     matches = matcher(doc)
     extracted_skills = [doc[start:end].text for _, start, end in matches]
-    
 
-    return set(extracted_skills)
+    def normalize_array(values, mapping):
+        # Build reverse lookup dict: synonym -> canonical
+        reverse_map = {}
+        for canonical, synonyms in mapping.items():
+            reverse_map[canonical.lower()] = canonical  # include canonical itself
+            for s in synonyms:
+                reverse_map[s.lower()] = canonical       # point synonyms to canonical
+        return [reverse_map.get(v.lower(), v) for v in values]
+
+    return set(normalize_array(extracted_skills, normalize_skills_dict))
+
+
 
 def validate_job_title(title: str) -> bool:
     invalid_keywords = ["devops",  "servicenow", "qa", "quality assurance", "data", "solution", "shopify",  "salesforce", "japanese", "microsoft", "cloud", "automation", 
@@ -50,6 +69,6 @@ def validate_job_title(title: str) -> bool:
     return True
 
 
-with open("job_nice.txt", "r") as f:
+with open("job_nice_2025_09_04.txt", "r") as f:
     content = f.read()
 print('skills', skill_extraction(content))

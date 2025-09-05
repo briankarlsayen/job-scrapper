@@ -1,0 +1,13 @@
+{
+  "React": ["react", "reactjs", "react.js"],
+  "Angular": ["angular", "angularjs"],
+  "Vue": ["vue", "vue.js", "vuejs"],
+  "Next.js": ["next", "next.js", "nextjs"],
+  "Nuxt.js": ["nuxt", "nuxt.js", "nuxtjs"],
+  "Node.js": ["node", "node.js", "nodejs"],
+  "Express.js": ["express", "express.js", "expressjs"],
+  "Nest.js": ["nest", "nest.js", "nestjs"],
+  "Python": ["python", "py"],
+  "Django": ["django", "dj"],
+  "TailwindCSS": ["tailwindcss", "tailwind", "tailwind css"]
+}

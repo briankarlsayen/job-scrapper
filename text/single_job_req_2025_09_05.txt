@@ -1,0 +1,27 @@
+Email:Resend
+Build, maintain, and optimize applications across our stack:React + Next.js frontendandTypeScript + Hono backend.
+Understanding of modern authentication (JWT, OAuth, Clerk experience a plus).
+Opportunity to work directly with the founders on a high-growth SaaS product.
+Deploy and scale services onVercelandCloudflare Workers.
+Auth:Clerk
+CI/CD pipelines and DevOps tooling
+Multi-tenancy in SaaS
+Career growth – chance to take ownership of key parts of the platform.
+Bonus points for experience with:
+Integrate and manage external services likeClerk (auth),Resend (email), and analytics/CRM tools (HubSpot, Apollo, GTM).
+Comfortable integrating external APIs and handling async workflows (email, webhooks, analytics).
+Remote-first culture – flexible hours, work from anywhere in the Philippines.
+Competitive salary (PHP-based, depending on experience).
+Frontend:TypeScript, React, Next.js, Tailwind CSS
+Strong knowledge ofTypeScript,React/Next.js, andTailwind CSS.
+Experience withPostgreSQLand designing data schemas for SaaS or multi-tenant apps.
+Familiarity withserverless platforms(Vercel, Cloudflare Workers, AWS Lambda, etc.).
+Be part of a mission-driven company helping students succeed in higher education.
+Hosting:Vercel, Cloudflare Workers
+Work withPostgreSQL (via Neon)to design and optimize data models for multi-tenant SaaS.
+3+ years of full-stack experience(SaaS product experience is a big plus).
+Collaborate with the founding team on new features, API integrations, and performance improvements.
+Backend:TypeScript, Hono
+Higher ed tech or lead-gen platforms
+Write clean, testable code and contribute to building a strong engineering culture.
+Database:PostgreSQL (Neon)

@@ -24,16 +24,32 @@
     "HTML",
     "CSS",
     "React",
+    "React.js",
+    "ReactJS",
+    "Vue",
     "Vue.js",
+    "VueJS",
     "Angular",
+    "Angular.js",
+    "AngularJS",
+    "Next",
     "Next.js",
+    "NextJS",
+    "Nuxt",
     "Nuxt.js",
+    "NuxtJS",
+    "Node",
     "Node.js",
+    "NodeJS",
+    "Express",
     "Express.js",
+    "ExpressJS",
     "Django",
     "Flask",
     "Spring Boot",
     "ASP.NET",
+    "Nest",
+    "Nest.js",
     "NestJS",
     "Laravel",
     "WordPress",
@@ -42,7 +58,13 @@
     "Shopify",
     "Remix",
     "Symfony",
-    "CodeIgniter"
+    "CodeIgniter",
+    "Hono",
+    "Ionic",
+    "Capacitor",
+    "Backbone",
+    "Backbone.js",
+    "BackboneJS"
   ],
   "APIs & Testing": [
     "SOAP",
@@ -54,8 +76,9 @@
     "Mocha",
     "Swagger",
     "OpenAPI",
-    "webhook",
+    "Webhook",
     "OAuth",
+    "OAuth2",
     "webhooks",
     "JWT",
     "Rabbit MQ",
@@ -78,7 +101,13 @@
     "GreenSock",
     "Handlebars.js",
     "Zustand",
-    "Prisma"
+    "Prisma",
+    "Apollo",
+    "TailwindCSS",
+    "Tailwind CSS",
+    "Tailwind",
+    "React Router",
+    "React Navigation"
   ],
   "Databases": [
     "SQL",
@@ -108,7 +137,11 @@
     "Shell Scripting",
     "Git",
     "GitHub",
-    "GitLab"
+    "GitLab",
+    "Vercel",
+    "Cloudflare",
+    "Hubspot",
+    "GTM"
   ],
   "Data Science & ML": [
     "Machine Learning",
@@ -167,6 +200,13 @@
     "PowerPoint",
     "Jira",
     "Confluence",
-    "Slack"
+    "Slack",
+    "Postman"
+  ],
+  "Analytics": [
+    "Google Analytics",
+    "Adobe Analytics",
+    "IBM Analytics",
+    "WebTrends"
   ]
 }
