@@ -208,7 +208,7 @@ while True:
 
 driver.quit()
 
-save_to_textfile(f"job_req_{formatted_date}.txt", "\n".join(job_requirement_list))
+save_to_textfile(f"./job_req_{formatted_date}.txt", "\n".join(job_requirement_list))
 
 # Save to CSV
 folder_path = "datas"

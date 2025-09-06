@@ -55,4 +55,4 @@ def update_file_with_skills(filepath: str, output_path: str):
 
 
 # Example usage
-update_file_with_skills("process_job.txt", "jobs_with_skills.txt")
+update_file_with_skills("./text/process_job.txt", "./text/jobs_with_skills.txt")
