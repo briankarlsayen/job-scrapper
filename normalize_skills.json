@@ -9,5 +9,8 @@
   "Nest.js": ["nest", "nest.js", "nestjs"],
   "Python": ["python", "py"],
   "Django": ["django", "dj"],
-  "TailwindCSS": ["tailwindcss", "tailwind", "tailwind css"]
+  "TailwindCSS": ["tailwindcss", "tailwind", "tailwind css"],
+  "HTML": ["html5", "html"],
+  "CSS": ["css3", "css"],
+  "MUI": ["material ui", "mui", "mui5"]
 }

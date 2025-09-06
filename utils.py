@@ -4,11 +4,13 @@ from spacy.matcher import PhraseMatcher
 import json
 import re
 
+def add_space_around_slash(text: str) -> str:
+    return text.replace("/", " / ")
+
 def insert_spaces_with_skills(text: str, skills: List[str]) -> str:
-    """Ensure skills from dictionary are separated by spaces."""
     fixed = text
     for skill in sorted(skills, key=len, reverse=True):  # longest first
-        if len(skill) < 3:  # skip very short skills
+        if len(skill) < 5:  # skip very short skills
             continue
         pattern = re.compile(re.escape(skill), re.IGNORECASE)
         fixed = pattern.sub(f" {skill} ", fixed)
@@ -31,7 +33,8 @@ def skill_extraction(content: str) -> List[str]:
         
     skills = [skill for category in skills_dict.values() for skill in category]
 
-    cleaned_content = insert_spaces_with_skills(content, skills)
+    cleaned_content = add_space_around_slash(content)
+    cleaned_content = insert_spaces_with_skills(cleaned_content, skills)
 
     nlp = spacy.load("en_core_web_sm")
     matcher = PhraseMatcher(nlp.vocab, attr="LOWER")
@@ -51,8 +54,7 @@ def skill_extraction(content: str) -> List[str]:
                 reverse_map[s.lower()] = canonical       # point synonyms to canonical
         return [reverse_map.get(v.lower(), v) for v in values]
 
-    return set(normalize_array(extracted_skills, normalize_skills_dict))
-
+    return list(set(normalize_array(extracted_skills, normalize_skills_dict)))
 
 
 def validate_job_title(title: str) -> bool:
@@ -60,7 +62,8 @@ def validate_job_title(title: str) -> bool:
                    "SAP", "CRM", "game producer", "azure integration", "SEO specialist", "google ads", "web designer", "campaign executive",
                    "quality engineer", "infastructure", "system admin", "coordinator", "oracle", "administrator", "unity", "graphic designer", 
                    "security consultant", "marketing", "wordpress", "writer",
-                   "ruby","java", ".net", "c#", "springboot", "laravel", "php",]
+                #    "ruby","java", ".net", "c#", "springboot", "laravel", "php",
+                   ]
     if not title:
         return False
     for item in invalid_keywords:

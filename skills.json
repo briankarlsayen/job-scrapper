@@ -22,7 +22,9 @@
   ],
   "Web Development": [
     "HTML",
+    "HTML5",
     "CSS",
+    "CSS3",
     "React",
     "React.js",
     "ReactJS",
@@ -48,6 +50,7 @@
     "Flask",
     "Spring Boot",
     "ASP.NET",
+    ".NET",
     "Nest",
     "Nest.js",
     "NestJS",
@@ -107,11 +110,15 @@
     "Tailwind CSS",
     "Tailwind",
     "React Router",
-    "React Navigation"
+    "React Navigation",
+    "Material UI",
+    "MUI",
+    "MUI5"
   ],
   "Databases": [
     "SQL",
     "NoSQL",
+    "RDMBS",
     "MySQL",
     "PostgreSQL",
     "MongoDB",
@@ -119,7 +126,8 @@
     "Oracle",
     "Redis",
     "Cassandra",
-    "DynamoDB"
+    "DynamoDB",
+    "MSSQL"
   ],
   "Cloud & DevOps": [
     "AWS",
@@ -180,7 +188,8 @@
     "LlamaIndex",
     "Copilot",
     "Cursor",
-    "Zapier"
+    "Zapier",
+    "Claude Code"
   ],
   "Mobile Development": [
     "Android",
