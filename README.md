@@ -25,7 +25,11 @@ TODO --------------> i need data!
 [x] create a file containing all requirements, have it separated but maintain it in one txt file
 [x] expand skills.json (ex. react, reactjs, react.js)
 [ ] update filter by job title, remove language filter
-[ ] get skills for job_req file, manually validate the accuracy
+[ ] get skills for job_req file, manually validate the accuracy, (process_text_file)
 --- [ ] if accurate enough <=90%, then proceed, else retry
 [ ] update saved excel file to have required skill
 [ ] create same skill extractor for jobstreet
+
+TIPS:
+
+- to get skills I need data from others: ask skills from others, get skills from resume, etc

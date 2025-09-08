@@ -10,6 +10,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from utils import save_to_textfile, skill_extraction, validate_job_title
+from selenium.common.exceptions import NoSuchElementException
 
 print('start')
 # Configure Selenium (headless Chrome)
@@ -100,6 +101,13 @@ def extract_section(container, headers):
     return list(results)
 
 
+def safe_find_element(parent, by: By, value: str):
+    try:
+        return parent.find_element(by, value)
+    except NoSuchElementException:
+        return None
+
+
 while True:
     BASE_URL = f"https://www.linkedin.com/jobs/search?keywords=Software%20Engineer&location=Philippines&geoId=103121230&f_TPR=r86400&f_WT=3%2C2&position=1"
     driver.get(BASE_URL)
@@ -139,7 +147,7 @@ while True:
         # if items >= 5: # limit to first 5
         #     break
 
-        title_tag = job.find_element(By.CSS_SELECTOR, "h3.base-search-card__title")
+        title_tag = safe_find_element(job, By.CSS_SELECTOR, "h3.base-search-card__title")
         title_text = title_tag.text.strip()
 
         if not validate_job_title(title_text):
@@ -165,19 +173,16 @@ while True:
 
         requirement_list = extract_section(job_description, headers)
 
-        link_tag = job.find_element(By.CSS_SELECTOR, "a.base-card__full-link")
+        link_tag = safe_find_element(job, By.CSS_SELECTOR, "a.base-card__full-link")
         job_link = link_tag.get_attribute("href") if link_tag else ""
         raw_link = job_link.split("?position")[0] if job_link else ""
 
         required_skills = skill_extraction("\n".join(requirement_list))
 
-        company_tag = job.find_element(By.CSS_SELECTOR, "h4.base-search-card__subtitle")
+        company_tag = safe_find_element(job, By.CSS_SELECTOR, "h4.base-search-card__subtitle")
         company_text = company_tag.text.strip()
-        location_tag = job.find_element(By.CSS_SELECTOR, "span.job-search-card__location")
+        location_tag = safe_find_element(job, By.CSS_SELECTOR, "span.job-search-card__location")
         location_text = location_tag.text.strip()
-        link_tag = job.find_element(By.CSS_SELECTOR, "a.base-card__full-link")
-        job_link = link_tag.get_attribute("href") if link_tag else ""
-        raw_link = job_link.split("?position")[0] if job_link else ""
 
         if raw_link in seen_links:
             duplicates +=1
@@ -208,14 +213,14 @@ while True:
 
 driver.quit()
 
-save_to_textfile(f"./job_req_{formatted_date}.txt", "\n".join(job_requirement_list))
+save_to_textfile(f"./text/job_req_{formatted_date}.txt", "\n".join(job_requirement_list))
 
 # Save to CSV
 folder_path = "datas"
 os.makedirs(folder_path, exist_ok=True)
 df = pd.DataFrame(jobs)
-today = date.today()
-formatted_date = today.strftime("%Y_%m_%d")
+# today = date.today()
+# formatted_date = today.strftime("%Y_%m_%d")
 file_path = os.path.join(folder_path, f"linkedin_jobs_{formatted_date}.csv")
 df.to_csv(file_path, sep=';', index=False)
 print(f"Scraped {len(jobs)} jobs from Linkedin.")

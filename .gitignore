@@ -1,2 +1,4 @@
-./datas
+datas/
+text/
+__pycache__/
 *.csv

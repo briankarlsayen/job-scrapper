@@ -1,5 +1,10 @@
 import re
 from utils import skill_extraction
+from datetime import date
+
+today = date.today()
+formatted_date = today.strftime("%Y_%m_%d")
+
 
 def extract_requirements(filepath: str):
     with open(filepath, "r", encoding="utf-8") as f:
@@ -55,4 +60,6 @@ def update_file_with_skills(filepath: str, output_path: str):
 
 
 # Example usage
-update_file_with_skills("./text/process_job.txt", "./text/jobs_with_skills.txt")
+text_file_path = f"./text/job_req_{formatted_date}.txt"
+update_text_file_path =  f"./text/jobs_with_skills_{formatted_date}.txt"
+update_file_with_skills(text_file_path, update_text_file_path)

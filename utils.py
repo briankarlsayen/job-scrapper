@@ -71,7 +71,3 @@ def validate_job_title(title: str) -> bool:
             return False
     return True
 
-
-with open("job_nice_2025_09_04.txt", "r") as f:
-    content = f.read()
-print('skills', skill_extraction(content))
