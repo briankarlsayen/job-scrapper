@@ -198,7 +198,6 @@ while True:
             "company": company_text if company_tag else "",
             "location": location_text if location_tag else "",
             "date_posted": "",
-            # "date_posted": date_text if date_tag else "",
             "scraped_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             "job_link": raw_link if raw_link else "",
             "required_skills": ",".join(required_skills) if len(required_skills) else "",
@@ -219,8 +218,6 @@ save_to_textfile(f"./text/job_req_{formatted_date}.txt", "\n".join(job_requireme
 folder_path = "datas"
 os.makedirs(folder_path, exist_ok=True)
 df = pd.DataFrame(jobs)
-# today = date.today()
-# formatted_date = today.strftime("%Y_%m_%d")
 file_path = os.path.join(folder_path, f"linkedin_jobs_{formatted_date}.csv")
 df.to_csv(file_path, sep=';', index=False)
 print(f"Scraped {len(jobs)} jobs from Linkedin.")

@@ -10,7 +10,7 @@ def add_space_around_slash(text: str) -> str:
 def insert_spaces_with_skills(text: str, skills: List[str]) -> str:
     fixed = text
     for skill in sorted(skills, key=len, reverse=True):  # longest first
-        if len(skill) < 5:  # skip very short skills
+        if len(skill) < 6:  # skip very short skills
             continue
         pattern = re.compile(re.escape(skill), re.IGNORECASE)
         fixed = pattern.sub(f" {skill} ", fixed)
@@ -39,11 +39,33 @@ def skill_extraction(content: str) -> List[str]:
     nlp = spacy.load("en_core_web_sm")
     matcher = PhraseMatcher(nlp.vocab, attr="LOWER")
 
-    patterns = [nlp.make_doc(skill) for skill in skills]
+    special_skills = {"C", "C++", "C#", "Go", "S3"} 
+    # Add patterns with token boundaries (skip 1–2 letter skills except special_skills)
+    valid_skills = [s for s in skills if len(s) > 2 or s in special_skills]
+    patterns = [nlp.make_doc(skill) for skill in valid_skills]
     matcher.add("SKILL", patterns)
     doc = nlp(cleaned_content)
     matches = matcher(doc)
-    extracted_skills = [doc[start:end].text for _, start, end in matches]
+    # extracted_skills = [doc[start:end].text for _, start, end in matches]
+    extracted_spans = [doc[start:end] for _, start, end in matches]
+    extracted_texts = [span.text.strip() for span in extracted_spans]
+    cleaned_skills = []
+    
+    for i, text in enumerate(extracted_texts):
+        # 1. Skip "C" if it's part of Vitamin C, scalability, etc.
+        if text == "C":
+            span = extracted_spans[i]
+            if (span.start > 0 and doc[span.start-1].is_alpha) or (
+                span.end < len(doc) and doc[span.end].is_alpha
+            ):
+                continue
+
+        # 2. Prevent substring duplicates (C inside C#, C inside C++)
+        if any(text != other and text in other for other in extracted_texts):
+            continue
+
+        cleaned_skills.append(text)
+
 
     def normalize_array(values, mapping):
         # Build reverse lookup dict: synonym -> canonical
@@ -54,7 +76,7 @@ def skill_extraction(content: str) -> List[str]:
                 reverse_map[s.lower()] = canonical       # point synonyms to canonical
         return [reverse_map.get(v.lower(), v) for v in values]
 
-    return list(set(normalize_array(extracted_skills, normalize_skills_dict)))
+    return list(set(normalize_array(cleaned_skills, normalize_skills_dict)))
 
 
 def validate_job_title(title: str) -> bool:

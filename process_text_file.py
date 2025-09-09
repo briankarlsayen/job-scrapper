@@ -60,6 +60,10 @@ def update_file_with_skills(filepath: str, output_path: str):
 
 
 # Example usage
+
+input_path = f"./text/job_req_2025_09_08.txt"
+output_path = f"./text/jobs_with_skills_2025_09_08_new.txt"
+
 text_file_path = f"./text/job_req_{formatted_date}.txt"
 update_text_file_path =  f"./text/jobs_with_skills_{formatted_date}.txt"
 update_file_with_skills(text_file_path, update_text_file_path)

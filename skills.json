@@ -18,7 +18,8 @@
     "Perl",
     "Scala",
     "XML",
-    "YML"
+    "YML",
+    "Golang"
   ],
   "Web Development": [
     "HTML",
@@ -48,6 +49,8 @@
     "ExpressJS",
     "Django",
     "Flask",
+    "Spring",
+    "Spring Framework",
     "Spring Boot",
     "ASP.NET",
     ".NET",
@@ -67,11 +70,18 @@
     "Capacitor",
     "Backbone",
     "Backbone.js",
-    "BackboneJS"
+    "BackboneJS",
+    "AJAX",
+    "Bootstrap",
+    "Webflow",
+    "Replo",
+    "Liquid"
   ],
   "APIs & Testing": [
     "SOAP",
     "REST API",
+    "RESTful",
+    "REST",
     "GraphQL",
     "WebSocket",
     "Jest",
@@ -87,7 +97,13 @@
     "Rabbit MQ",
     "JUnit",
     "Mockito",
-    "SonarQube"
+    "SonarQube",
+    "Rspec",
+    "xUnit",
+    "NUnit",
+    "Jasmine",
+    "Karma",
+    "gRPC"
   ],
   "JavaScript Libraries": [
     "jQuery",
@@ -113,27 +129,45 @@
     "React Navigation",
     "Material UI",
     "MUI",
-    "MUI5"
+    "MUI5",
+    "NgRx",
+    "Akita"
   ],
   "Databases": [
     "SQL",
     "NoSQL",
     "RDMBS",
     "MySQL",
+    "My SQL",
+    "Postgres",
     "PostgreSQL",
+    "Postgre SQL",
     "MongoDB",
+    "Mongo DB",
     "SQLite",
     "Oracle",
+    "Oracle SQL",
+    "OracleSQL",
     "Redis",
+    "RedisDB",
     "Cassandra",
+    "CassandraDB",
+    "Dynamo DB",
     "DynamoDB",
-    "MSSQL"
+    "MSSQL",
+    "MS SQL",
+    "Relational",
+    "Maria DB",
+    "MariaDB",
+    "Cosmos DB",
+    "CosmosDB"
   ],
-  "Cloud & DevOps": [
+  "Cloud & DevOps (General)": [
     "AWS",
     "Amazon Web Services",
     "Azure",
     "Google Cloud",
+    "Google Cloud Platform",
     "GCP",
     "Docker",
     "Kubernetes",
@@ -149,7 +183,16 @@
     "Vercel",
     "Cloudflare",
     "Hubspot",
-    "GTM"
+    "GTM",
+    "CircleCI",
+    "Prometheus",
+    "Grafana",
+    "OpenTelemetry",
+    "DataDog",
+    "LaunchDarkly",
+    "NewRelic",
+    "Flyio",
+    "Fly.io"
   ],
   "Data Science & ML": [
     "Machine Learning",
@@ -159,6 +202,7 @@
     "Pandas",
     "NumPy",
     "scikit-learn",
+    "Scikit Learn",
     "TensorFlow",
     "PyTorch",
     "Keras",
@@ -168,7 +212,9 @@
     "Data Visualization",
     "Big Data",
     "Hadoop",
-    "Spark"
+    "Spark",
+    "Pickle",
+    "MLOps"
   ],
   "AI Tools": [
     "ChatGPT",
@@ -210,12 +256,48 @@
     "Jira",
     "Confluence",
     "Slack",
-    "Postman"
+    "Postman",
+    "Kafka",
+    "RabbitMQ",
+    "Swift messaging",
+    "JSON",
+    "Batch",
+    "AIX"
   ],
   "Analytics": [
     "Google Analytics",
     "Adobe Analytics",
     "IBM Analytics",
-    "WebTrends"
-  ]
+    "WebTrends",
+    "Twillio Segment"
+  ],
+  "Scala Ecosystem": ["Pekko", "Cats Effect", "FS2", "Akka", "Shapeless"],
+  "Processes & Certifications": [
+    "SDLC",
+    "ITSM",
+    "MCSD",
+    "Software Design Patterns",
+    "MVC",
+    "Object-oriented Programming",
+    "Object oriented Programming",
+    "OOP"
+  ],
+  "Microsoft / .NET Ecosystem": [
+    "ASP.NET",
+    "MVC",
+    "Web API",
+    "Blazor",
+    "Entity Framework",
+    "LINQ"
+  ],
+  "Microsoft Cloud Ecosystem": [
+    "Azure VM",
+    "SQL Azure",
+    "Power Platform",
+    "Power Apps",
+    "Power Automate",
+    "PowerShell",
+    "SharePoint"
+  ],
+  "AWS Ecosystem": ["ECS", "EKS", "S3", "Lambda", "EC2", "ELK"]
 }

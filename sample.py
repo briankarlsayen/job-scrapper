@@ -1,4 +1,4 @@
-from utils import save_to_textfile, skill_extraction, validate_job_title
+from utils import save_to_textfile
 from datetime import datetime, date
 job_requirement_list = ['hahaha', 'hahaha', 'hahaha']
 
