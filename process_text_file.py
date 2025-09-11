@@ -5,26 +5,6 @@ from datetime import date
 today = date.today()
 formatted_date = today.strftime("%Y_%m_%d")
 
-
-def extract_requirements(filepath: str):
-    with open(filepath, "r", encoding="utf-8") as f:
-        text = f.read()
-
-    # Find blocks that start with "Requirements:" and end before "====="
-    matches = re.findall(r"Requirements:\s*(.*?)={5,}", text, flags=re.DOTALL)
-
-    all_requirements = []
-    for block in matches:
-        # Split by line, remove empty ones
-        items = [line.strip() for line in block.splitlines() if line.strip()]
-        all_requirements.extend(items)
-
-    return all_requirements
-
-# Example usage
-# requirements = extract_requirements("./process_job.txt")
-# print(requirements)
-
 def update_file_with_skills(filepath: str, output_path: str):
 
     with open(filepath, "r", encoding="utf-8") as f:

@@ -49,9 +49,6 @@
     "ExpressJS",
     "Django",
     "Flask",
-    "Spring",
-    "Spring Framework",
-    "Spring Boot",
     "ASP.NET",
     ".NET",
     "Nest",
@@ -155,6 +152,7 @@
     "Dynamo DB",
     "DynamoDB",
     "MSSQL",
+    "Microsoft SQL",
     "MS SQL",
     "Relational",
     "Maria DB",
@@ -162,6 +160,7 @@
     "Cosmos DB",
     "CosmosDB"
   ],
+  "Vector Databases": ["Chroma", "Pinecone", "Weaviate", "Faiss"],
   "Cloud & DevOps (General)": [
     "AWS",
     "Amazon Web Services",
@@ -192,7 +191,10 @@
     "LaunchDarkly",
     "NewRelic",
     "Flyio",
-    "Fly.io"
+    "Fly.io",
+    "Airflow",
+    "VPS",
+    "Firebase"
   ],
   "Data Science & ML": [
     "Machine Learning",
@@ -214,12 +216,15 @@
     "Hadoop",
     "Spark",
     "Pickle",
-    "MLOps"
+    "MLOps",
+    "AIOps"
   ],
   "AI Tools": [
     "ChatGPT",
     "OpenAI API",
     "LangChain",
+    "LangGraph",
+    "LangSmith",
     "Hugging Face",
     "TensorFlow Hub",
     "PyTorch Hub",
@@ -235,7 +240,10 @@
     "Copilot",
     "Cursor",
     "Zapier",
-    "Claude Code"
+    "Claude Code",
+    "ElevenLabs",
+    "Retell AI",
+    "Loveable"
   ],
   "Mobile Development": [
     "Android",
@@ -262,14 +270,17 @@
     "Swift messaging",
     "JSON",
     "Batch",
-    "AIX"
+    "AIX",
+    "SVN",
+    "Tortoise"
   ],
   "Analytics": [
     "Google Analytics",
     "Adobe Analytics",
     "IBM Analytics",
     "WebTrends",
-    "Twillio Segment"
+    "Twillio Segment",
+    "Looker Studio"
   ],
   "Scala Ecosystem": ["Pekko", "Cats Effect", "FS2", "Akka", "Shapeless"],
   "Processes & Certifications": [
@@ -293,11 +304,42 @@
   "Microsoft Cloud Ecosystem": [
     "Azure VM",
     "SQL Azure",
+    "Azure SQL",
     "Power Platform",
     "Power Apps",
     "Power Automate",
     "PowerShell",
-    "SharePoint"
+    "SharePoint",
+    "App Services",
+    "Azure Functions",
+    "Logic Apps",
+    "Service Bus",
+    "Event Grid",
+    "APIM",
+    "ADLS",
+    "Azure AD"
   ],
-  "AWS Ecosystem": ["ECS", "EKS", "S3", "Lambda", "EC2", "ELK"]
+  "AWS Ecosystem": ["ECS", "EKS", "S3", "Lambda", "EC2", "ELK"],
+  "Java Ecosystem": [
+    "Spring Framework",
+    "Spring Boot",
+    "Spring",
+    "JPA",
+    "Hibernate",
+    "EJB",
+    "RMI",
+    "Swing",
+    "Maven",
+    "Ant",
+    "Eclipse",
+    "Liquibase"
+  ],
+  "Project & Workflow Tools": [
+    "ClickUp",
+    "Replo",
+    "Webflow",
+    "Liquid",
+    "n8n",
+    "make.com"
+  ]
 }

@@ -5,7 +5,9 @@ import json
 import re
 
 def add_space_around_slash(text: str) -> str:
-    return text.replace("/", " / ")
+    pascal_case_space = re.sub(r'(?<=[a-z])(?=[A-Z])', ' ', text)
+    pascal_case_space.replace("/", " / ")
+    return pascal_case_space
 
 def insert_spaces_with_skills(text: str, skills: List[str]) -> str:
     fixed = text
@@ -83,7 +85,7 @@ def validate_job_title(title: str) -> bool:
     invalid_keywords = ["devops",  "servicenow", "qa", "quality assurance", "data", "solution", "shopify",  "salesforce", "japanese", "microsoft", "cloud", "automation", 
                    "SAP", "CRM", "game producer", "azure integration", "SEO specialist", "google ads", "web designer", "campaign executive",
                    "quality engineer", "infastructure", "system admin", "coordinator", "oracle", "administrator", "unity", "graphic designer", 
-                   "security consultant", "marketing", "wordpress", "writer",
+                   "security consultant", "marketing", "wordpress", "writer", "citrix"
                 #    "ruby","java", ".net", "c#", "springboot", "laravel", "php",
                    ]
     if not title:

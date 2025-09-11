@@ -11,20 +11,15 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from utils import save_to_textfile, skill_extraction, validate_job_title
 from selenium.common.exceptions import NoSuchElementException
-from constant import PREFERRED_KEYWORDS, REQ_KEYWORDS
+from constant import PREFERRED_KEYWORDS, REQ_KEYWORDS, BULLET_CHARS
 
 print('start')
-# Configure Selenium (headless Chrome)
-options = Options()
-options.add_argument("--headless")
-options.add_argument("--disable-gpu")
-options.add_argument("--window-size=1920,1080")
 
 driver = webdriver.Chrome()
 driver.set_window_size(1920, 1080)
 
 jobs = []
-page = 0
+page = 1
 seen_links = set()
 duplicates = 0
 PAGE_LIMIT = 10
@@ -54,6 +49,13 @@ def extract_section(container, headers):
                 text = li.get_text(strip=True)
                 if text:  # skip empty
                     results.add(text)
+        elif sibling.string:
+            raw_text = sibling.get_text(strip=True)
+            if raw_text and any(raw_text.startswith(b) for b in BULLET_CHARS):
+                cleaned = raw_text.lstrip("".join(BULLET_CHARS)).replace("\xa0", " ")
+                cleaned = " ".join(cleaned.split())  # normalize spaces
+                if cleaned:
+                    results.add(cleaned)
 
     return list(results)
 
@@ -66,28 +68,16 @@ def safe_find_element(parent, by: By, value: str):
 
 
 while True:
-    BASE_URL = f"https://www.linkedin.com/jobs/search?keywords=Software%20Engineer&location=Philippines&geoId=103121230&f_TPR=r86400&f_WT=3%2C2&position=1"
+    BASE_URL = f"https://ph.jobstreet.com/web-developer-jobs?daterange=1&pos=1&salaryrange=70000-&salarytype=monthly&workarrangement=2%2C3&page={page}"
     driver.get(BASE_URL)
     time.sleep(3) 
     wait = WebDriverWait(driver, 10)
 
-    close_button = ""
+    job_cards = [] 
     try:
-        close_button = WebDriverWait(driver, 10).until(
-            EC.element_to_be_clickable((By.CSS_SELECTOR,
-                'button[data-tracking-control-name="public_jobs_contextual-sign-in-modal_modal_dismiss"]'))
-        )
-        time.sleep(1)
-        driver.execute_script("arguments[0].scrollIntoView(true);", close_button)
-        
-        close_button.click()
-        print("Login modal closed ✅")
-    except Exception as e:
-        # driver.execute_script("arguments[0].click();", close_button)
-        print("No modal or not clickable:", e)
-        # break
-
-    job_cards = wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, "ul.jobs-search__results-list li")))
+        job_cards = wait.until(EC.presence_of_all_elements_located((By.TAG_NAME, "article")))
+    except:
+        print("⚠️ No job cards found")
 
     if not job_cards:
         break
@@ -97,6 +87,7 @@ while True:
     print('Unfiltered jobs: ', len(job_cards))
 
     requirement_datas = []
+    print('job_cards', job_cards)
 
     for job in job_cards:
         time.sleep(1)
@@ -104,19 +95,18 @@ while True:
         # if items >= 5: # limit to first 5
         #     break
 
-        title_tag = safe_find_element(job, By.CSS_SELECTOR, "h3.base-search-card__title")
+        title_tag = safe_find_element(job, By.CSS_SELECTOR, "a[data-automation=jobTitle]")
         title_text = title_tag.text.strip() if title_tag else None
         if not validate_job_title(title_text):
+            print('Not valid job :', title_text)
             continue
 
-        link_tag = safe_find_element(job, By.CSS_SELECTOR, "a.base-card__full-link")
-        job_link = link_tag.get_attribute("href") if link_tag else None
-        raw_link = job_link.split("?position")[0] if job_link else None
-        company_tag = safe_find_element(job, By.CSS_SELECTOR, "h4.base-search-card__subtitle")
+        raw_link = title_tag.get_attribute("href") if title_tag else None
+        company_tag = safe_find_element(job, By.CSS_SELECTOR, "a[data-automation=jobCompany]")
         company_text = company_tag.text.strip() if company_tag else None
-        location_tag = safe_find_element(job, By.CSS_SELECTOR, "span.job-search-card__location")
+        location_tag = safe_find_element(job, By.CSS_SELECTOR, "span[data-automation=jobLocation]")
         location_text = location_tag.text.strip() if location_tag else None
-        date_tag = safe_find_element(job, By.CSS_SELECTOR, "time.job-search-card__listdate--new")
+        date_tag = safe_find_element(job, By.CSS_SELECTOR, "span[data-automation=jobListingDate]")
         date_text = date_tag.text.strip() if date_tag else None
 
         if raw_link in seen_links:
@@ -125,12 +115,17 @@ while True:
         seen_links.add(raw_link)
 
         job.click()
-        items += 1 
+        items += 1
         time.sleep(8)
 
         headers = PREFERRED_KEYWORDS + REQ_KEYWORDS
         soup = BeautifulSoup(driver.page_source, "html.parser")
-        job_description = soup.select_one("div.show-more-less-html__markup")
+        job_description = soup.select_one("div", {"data-automation": "splitViewJobDetailsWrapper"})
+        if not job_description:
+            continue
+        else:
+            print('found it!')
+
         requirement_list = extract_section(job_description, headers)
         required_skills = skill_extraction("\n".join(requirement_list))
 
@@ -150,9 +145,8 @@ while True:
             "required_skills": ",".join(required_skills) if len(required_skills) else "N/A",
             "date_posted": date_text if date_text else "N/A",
             "scraped_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            "job_link": raw_link if raw_link else "N/A",
+            "job_link": f"https://ph.jobstreet.com{raw_link}" if raw_link else "N/A",
         })
-    # break
     page += 1
 
     if duplicates >= 5:
@@ -177,5 +171,5 @@ def create_job_folder(folder_name: str, file_name: str, text_content: str, csv_c
     df = pd.DataFrame(csv_content)
     df.to_csv(csv_file_path, sep=';', index=False)
 
-create_job_folder(folder_name=formatted_date, file_name="linkedin", text_content="\n".join(job_requirement_list), csv_content=jobs)
+create_job_folder(folder_name=formatted_date, file_name="jobstreet", text_content="\n".join(job_requirement_list), csv_content=jobs)
 print(f"Scraped {len(jobs)} jobs from Linkedin.")

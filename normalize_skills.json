@@ -22,7 +22,7 @@
   "GCP": ["google cloud", "google cloud platform", "gcp"],
   "MariaDB": ["maria db", "mariadb"],
   "DynamoDB": ["dynamo db", "dynamodb"],
-  "MSSQL": ["mssql", "ms sql"],
+  "MSSQL": ["mssql", "ms sql", "microsoft sql"],
   "SQL": ["relational", "sql"],
   "CosmosDB": ["cosmos db", "cosmosdb"],
   "PostgreSQL": ["postgresql", "postgre sql", "postgres"],
