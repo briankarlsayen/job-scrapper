@@ -5,7 +5,7 @@ import json
 import re
 
 def add_space_around_slash(text: str) -> str:
-    pascal_case_space = re.sub(r'(?<=[a-z])(?=[A-Z])', ' ', text)
+    pascal_case_space = re.sub(r'(?<=[a-z])(?=[A-Z])', ' ', text) if re.match(r'^[a-z]', text) else text
     pascal_case_space.replace("/", " / ")
     return pascal_case_space
 
@@ -41,32 +41,64 @@ def skill_extraction(content: str) -> List[str]:
     nlp = spacy.load("en_core_web_sm")
     matcher = PhraseMatcher(nlp.vocab, attr="LOWER")
 
-    special_skills = {"C", "C++", "C#", "Go", "S3"} 
+    special_skills = {"C", "C++", "C#", "Go", "S3",} 
     # Add patterns with token boundaries (skip 1–2 letter skills except special_skills)
     valid_skills = [s for s in skills if len(s) > 2 or s in special_skills]
     patterns = [nlp.make_doc(skill) for skill in valid_skills]
     matcher.add("SKILL", patterns)
     doc = nlp(cleaned_content)
     matches = matcher(doc)
-    # extracted_skills = [doc[start:end].text for _, start, end in matches]
     extracted_spans = [doc[start:end] for _, start, end in matches]
     extracted_texts = [span.text.strip() for span in extracted_spans]
     cleaned_skills = []
     
     for i, text in enumerate(extracted_texts):
+        span = extracted_spans[i]
         # 1. Skip "C" if it's part of Vitamin C, scalability, etc.
         if text == "C":
-            span = extracted_spans[i]
+            sentence = span.sent.text.lower()
             if (span.start > 0 and doc[span.start-1].is_alpha) or (
                 span.end < len(doc) and doc[span.end].is_alpha
             ):
+                continue
+        # if text.lower() == "java":
+        #     print('text', text)
+
+
+        #     # if (span.start > 0 and doc[span.start-1].is_alpha) or (
+        #     #     span.end < len(doc) and doc[span.end].is_alpha
+        #     # ):
+        #     #     continue
+        #       # 2. Skip "Java" if it’s part of "JavaScript"
+        #     if span.end < len(doc) and doc[span.end].text.lower().startswith("script"):
+        #         continue
+        if text.lower() == "java":
+            # If it's followed by "script", skip it
+            if span.end < len(doc) and doc[span.end].text.lower().startswith("script"):
+                continue
+            else:
+                cleaned_skills.append(text)  # ✅ safe to add
                 continue
 
         # 2. Prevent substring duplicates (C inside C#, C inside C++)
         if any(text != other and text in other for other in extracted_texts):
             continue
 
+        if text.upper() == "PHP":
+            sentence = span.sent.text.lower()   # full sentence containing PHP
+            if "salary" in sentence or "bonus" in sentence:
+                continue  # skip if PHP is used in a salary/bonus context
+
+        # if text.lower() == "java":
+        #     span = extracted_spans[i]
+        #     print('span', span)
+        #     sentence = span.sent.text.lower()  
+
         cleaned_skills.append(text)
+
+    print(' cleaned_skills', cleaned_skills)
+
+
 
 
     def normalize_array(values, mapping):
@@ -77,6 +109,7 @@ def skill_extraction(content: str) -> List[str]:
             for s in synonyms:
                 reverse_map[s.lower()] = canonical       # point synonyms to canonical
         return [reverse_map.get(v.lower(), v) for v in values]
+    
 
     return list(set(normalize_array(cleaned_skills, normalize_skills_dict)))
 

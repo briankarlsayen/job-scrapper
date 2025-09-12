@@ -33,7 +33,8 @@ TODO --------------> i need data!
 --- [x] inside folder create text and csv files
 [x] update saved excel file to have required skill
 [x] create same skill extractor for jobstreet
-[ ] fix extracted skill - PHP
+[x] fix extracted skill - PHP, Java
+[ ] include bullet char job requirements
 [ ] add job title to the skill extractor
 [ ] add job rating, classification: by job title, skills
 [ ] automatic running: by my pc or raspi

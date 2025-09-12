@@ -1,8 +1,8 @@
 {
   "Programming Languages": [
     "Python",
-    "Java",
     "JavaScript",
+    "Java",
     "TypeScript",
     "C",
     "C++",
@@ -80,6 +80,8 @@
     "RESTful",
     "REST",
     "GraphQL",
+    "Graph QL",
+    "GraphQL API",
     "WebSocket",
     "Jest",
     "Cypress",
@@ -100,7 +102,12 @@
     "NUnit",
     "Jasmine",
     "Karma",
-    "gRPC"
+    "gRPC",
+    "Airbyte",
+    "NetSuite",
+    "QuickBooks",
+    "HubSpot",
+    "Saleforce"
   ],
   "JavaScript Libraries": [
     "jQuery",
@@ -128,7 +135,8 @@
     "MUI",
     "MUI5",
     "NgRx",
-    "Akita"
+    "Akita",
+    "TypeORM"
   ],
   "Databases": [
     "SQL",
@@ -194,7 +202,8 @@
     "Fly.io",
     "Airflow",
     "VPS",
-    "Firebase"
+    "Firebase",
+    "Bitbucket"
   ],
   "Data Science & ML": [
     "Machine Learning",
@@ -341,5 +350,11 @@
     "Liquid",
     "n8n",
     "make.com"
+  ],
+  "Enterprise Software (ERP/CRM/Finance)": [
+    "NetSuite",
+    "QuickBooks",
+    "HubSpot",
+    "Salesforce"
   ]
 }

@@ -87,7 +87,6 @@ while True:
     print('Unfiltered jobs: ', len(job_cards))
 
     requirement_datas = []
-    print('job_cards', job_cards)
 
     for job in job_cards:
         time.sleep(1)
@@ -123,8 +122,6 @@ while True:
         job_description = soup.select_one("div", {"data-automation": "splitViewJobDetailsWrapper"})
         if not job_description:
             continue
-        else:
-            print('found it!')
 
         requirement_list = extract_section(job_description, headers)
         required_skills = skill_extraction("\n".join(requirement_list))

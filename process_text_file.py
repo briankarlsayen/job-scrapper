@@ -15,17 +15,17 @@ def update_file_with_skills(filepath: str, output_path: str):
     updated_posts = []
 
     for post in posts:
+        post = re.sub(r"\nSkills:.*?(?=\n=+|$)", "", post, flags=re.DOTALL)
         if "Requirements:" in post:
             # Extract requirements block
             req_match = re.search(r"Requirements:\s*(.*)", post, flags=re.DOTALL)
             if req_match:
                 requirements_text = req_match.group(1).strip()
                 skills_found = skill_extraction(requirements_text)
-                print('skills_found: ', skills_found)
+                # print('skills_found: ', skills_found)
 
                 if skills_found:
                     skills_section = "Skills:\n" + ",".join(skills_found) + "\n"
-                    # Insert skills section before trailing whitespace
                     post = post.strip() + "\n" + skills_section
         updated_posts.append(post.strip())
         
@@ -41,9 +41,9 @@ def update_file_with_skills(filepath: str, output_path: str):
 
 # Example usage
 
-input_path = f"./text/job_req_2025_09_08.txt"
-output_path = f"./text/jobs_with_skills_2025_09_08_new.txt"
+input_path = f"./text/sample_job_1.txt"
+output_path = f"./text/sample_job_1_updated.txt"
 
 text_file_path = f"./text/job_req_{formatted_date}.txt"
 update_text_file_path =  f"./text/jobs_with_skills_{formatted_date}.txt"
-update_file_with_skills(text_file_path, update_text_file_path)
+update_file_with_skills(input_path, output_path)

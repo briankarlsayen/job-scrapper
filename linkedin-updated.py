@@ -12,15 +12,19 @@ from selenium.webdriver.common.by import By
 from utils import save_to_textfile, skill_extraction, validate_job_title
 from selenium.common.exceptions import NoSuchElementException
 from constant import PREFERRED_KEYWORDS, REQ_KEYWORDS
+from selenium.webdriver.chrome.service import Service
 
 print('start')
 # Configure Selenium (headless Chrome)
+# brave_path = "/snap/bin/brave"
+
 options = Options()
-options.add_argument("--headless")
+# options.add_argument("--headless")
 options.add_argument("--disable-gpu")
 options.add_argument("--window-size=1920,1080")
-
-driver = webdriver.Chrome()
+# options.binary_location = brave_path
+# service = Service("/usr/bin/chromedriver")
+driver = webdriver.Chrome(options=options)
 driver.set_window_size(1920, 1080)
 
 jobs = []
@@ -101,6 +105,8 @@ while True:
     for job in job_cards:
         time.sleep(1)
 
+
+
         # if items >= 5: # limit to first 5
         #     break
 
@@ -125,12 +131,22 @@ while True:
         seen_links.add(raw_link)
 
         job.click()
-        items += 1 
         time.sleep(8)
+        items += 1 
+
+        current_url = driver.current_url
+        if "/jobs/view/" in current_url:
+            print("Redirect detected:", current_url)
+            driver.back()  # go back to previous results page
+            time.sleep(2)  # wait to reload results page
+            break
 
         headers = PREFERRED_KEYWORDS + REQ_KEYWORDS
         soup = BeautifulSoup(driver.page_source, "html.parser")
         job_description = soup.select_one("div.show-more-less-html__markup")
+        if not job_description:
+            continue
+
         requirement_list = extract_section(job_description, headers)
         required_skills = skill_extraction("\n".join(requirement_list))
 

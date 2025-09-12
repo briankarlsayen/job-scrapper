@@ -31,5 +31,6 @@
   "OracleSQL": ["oracle", "oracle sql", "oraclesql"],
   "Redis": ["redis", "redisdb"],
   "Cassandra": ["cassandra", "cassandradb"],
-  "Spring Framework": ["Spring", "Spring Framework"]
+  "Spring Framework": ["Spring", "Spring Framework"],
+  "GraphQL": ["graphql", "graph ql", "graphql api"]
 }
