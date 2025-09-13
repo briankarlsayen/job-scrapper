@@ -6,8 +6,8 @@ import re
 
 def add_space_around_slash(text: str) -> str:
     pascal_case_space = re.sub(r'(?<=[a-z])(?=[A-Z])', ' ', text) if re.match(r'^[a-z]', text) else text
-    pascal_case_space.replace("/", " / ")
-    return pascal_case_space
+    # pascal_case_space.replace("/", " / ")
+    return re.sub(r"\s*/\s*", " / ", pascal_case_space)
 
 def insert_spaces_with_skills(text: str, skills: List[str]) -> str:
     fixed = text
@@ -51,6 +51,44 @@ def skill_extraction(content: str) -> List[str]:
     extracted_spans = [doc[start:end] for _, start, end in matches]
     extracted_texts = [span.text.strip() for span in extracted_spans]
     cleaned_skills = []
+
+    def validate_php(text: str) -> bool:
+        if "salary" in text or "bonus" in text:
+            return True
+        
+        pattern = r'[\$€£]?\d+(?:,\d{3})*(?:\.\d+)?(?:[KMkm])?\b'
+        for raw in re.findall(pattern, text):
+            s = raw.strip()
+
+            # remove leading currency symbol if present
+            if s and s[0] in "$€£":
+                s = s[1:]
+
+            # detect K/M suffix
+            suffix = ''
+            if s and s[-1].upper() in ("K", "M"):
+                suffix = s[-1].upper()
+                s = s[:-1]
+
+            # remove commas and parse number (allow decimals)
+            s_clean = s.replace(",", "")
+            try:
+                num = float(s_clean)
+            except ValueError:
+                continue
+
+            # apply multiplier for K / M
+            if suffix == "K":
+                num *= 1_000
+            elif suffix == "M":
+                num *= 1_000_000
+
+            if num > 100:
+                return True
+
+        return False
+    
+    print('cleaned_content', cleaned_content)
     
     for i, text in enumerate(extracted_texts):
         span = extracted_spans[i]
@@ -61,17 +99,7 @@ def skill_extraction(content: str) -> List[str]:
                 span.end < len(doc) and doc[span.end].is_alpha
             ):
                 continue
-        # if text.lower() == "java":
-        #     print('text', text)
 
-
-        #     # if (span.start > 0 and doc[span.start-1].is_alpha) or (
-        #     #     span.end < len(doc) and doc[span.end].is_alpha
-        #     # ):
-        #     #     continue
-        #       # 2. Skip "Java" if it’s part of "JavaScript"
-        #     if span.end < len(doc) and doc[span.end].text.lower().startswith("script"):
-        #         continue
         if text.lower() == "java":
             # If it's followed by "script", skip it
             if span.end < len(doc) and doc[span.end].text.lower().startswith("script"):
@@ -86,20 +114,10 @@ def skill_extraction(content: str) -> List[str]:
 
         if text.upper() == "PHP":
             sentence = span.sent.text.lower()   # full sentence containing PHP
-            if "salary" in sentence or "bonus" in sentence:
+            if validate_php(sentence):
                 continue  # skip if PHP is used in a salary/bonus context
 
-        # if text.lower() == "java":
-        #     span = extracted_spans[i]
-        #     print('span', span)
-        #     sentence = span.sent.text.lower()  
-
         cleaned_skills.append(text)
-
-    print(' cleaned_skills', cleaned_skills)
-
-
-
 
     def normalize_array(values, mapping):
         # Build reverse lookup dict: synonym -> canonical

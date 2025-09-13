@@ -6,3 +6,5 @@ REQ_KEYWORDS = ["qualification", "require",
 PREFERRED_KEYWORDS = ["nice to have", "preferred", "bonus points"]
 
 BULLET_CHARS = {"●", "•", "-", "*"}
+
+SEPARATOR = "================================================================"

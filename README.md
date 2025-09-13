@@ -28,16 +28,17 @@ TODO --------------> i need data!
 [x] get skills for job_req file, manually validate the accuracy, (process_text_file)
 --- [x] if accurate enough <=90%, then proceed, else retry
 [x] apply skill_extration to linkedin-updated
-[x] save format
+[x] save formatw
 --- [x] create a folder based on date
 --- [x] inside folder create text and csv files
 [x] update saved excel file to have required skill
 [x] create same skill extractor for jobstreet
 [x] fix extracted skill - PHP, Java
-[ ] include bullet char job requirements
-[ ] add job title to the skill extractor
+[x] include bullet char job requirements
+[x] add job title to the skill extractor
 [ ] add job rating, classification: by job title, skills
 [ ] automatic running: by my pc or raspi
+[ ] linkedin scroll down to load new jobs
 TIPS:
 
 - to get skills I need data from others: ask skills from others, get skills from resume, etc

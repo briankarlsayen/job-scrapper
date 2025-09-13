@@ -107,7 +107,8 @@
     "NetSuite",
     "QuickBooks",
     "HubSpot",
-    "Saleforce"
+    "Saleforce",
+    "tRPC"
   ],
   "JavaScript Libraries": [
     "jQuery",
@@ -141,7 +142,7 @@
   "Databases": [
     "SQL",
     "NoSQL",
-    "RDMBS",
+    "RDBMS",
     "MySQL",
     "My SQL",
     "Postgres",
@@ -281,7 +282,8 @@
     "Batch",
     "AIX",
     "SVN",
-    "Tortoise"
+    "Tortoise",
+    "Adobe"
   ],
   "Analytics": [
     "Google Analytics",
@@ -328,7 +330,18 @@
     "ADLS",
     "Azure AD"
   ],
-  "AWS Ecosystem": ["ECS", "EKS", "S3", "Lambda", "EC2", "ELK"],
+  "AWS Ecosystem": [
+    "ECS",
+    "EKS",
+    "S3",
+    "Lambda",
+    "EC2",
+    "ELK",
+    "Amplify",
+    "AppSync",
+    "Aurora",
+    "RDS"
+  ],
   "Java Ecosystem": [
     "Spring Framework",
     "Spring Boot",
