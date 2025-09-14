@@ -6,22 +6,9 @@
 - show the jobs that I can apply to
 
 TODOS
-[ ] further filter by checking the job post requirements
---- [ ] pass the requirements and nice to the nlp filter
---- [ ] create a csv file, add requirements, requirement score(12/14), failed requirement(seo,java,php), nice to haves, nth score, failed nth, status(passed or failed)
-
-BUG
-[ ] linkedin access scroll bottom to full content
-
-importants: [requirement, preferred experience, preferred qualification, for this role you will need, qualification, what we ask of you, ]
-
-- strong/p
-- has ul's
-
-others: [nice to have,]
-
-TODO --------------> i need data!
-
+[x] further filter by checking the job post requirements
+--- [x] pass the requirements and nice to the nlp filter
+--- [x] create a csv file, add requirements, requirement score(12/14), failed requirement(seo,java,php), nice to haves, nth score, failed nth, status(passed or failed)
 [x] create a file containing all requirements, have it separated but maintain it in one txt file
 [x] expand skills.json (ex. react, reactjs, react.js)
 [x] update filter by job title, remove language filter
@@ -36,9 +23,19 @@ TODO --------------> i need data!
 [x] fix extracted skill - PHP, Java
 [x] include bullet char job requirements
 [x] add job title to the skill extractor
-[ ] add job rating, classification: by job title, skills
+[ ] job rating
+--- [x] create classification by skills
+--- [ ] weight skill differently, Programming Languages > JavaScript Libraries, etc
+[ ] add this to ranking to main file
+[ ] make error handler for main when scraper failed, run it 3x
 [ ] automatic running: by my pc or raspi
 [ ] linkedin scroll down to load new jobs
+
 TIPS:
 
 - to get skills I need data from others: ask skills from others, get skills from resume, etc
+
+BUGS
+[ ] C not listed when C, C++ exist
+[ ] Git not listed when Git/Github
+[ ] linkedin access scroll bottom to full content

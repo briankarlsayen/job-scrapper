@@ -88,8 +88,6 @@ def skill_extraction(content: str) -> List[str]:
 
         return False
     
-    print('cleaned_content', cleaned_content)
-    
     for i, text in enumerate(extracted_texts):
         span = extracted_spans[i]
         # 1. Skip "C" if it's part of Vitamin C, scalability, etc.

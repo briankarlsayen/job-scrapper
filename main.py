@@ -41,8 +41,6 @@ df = pd.concat(dfs, ignore_index=True)
 print('jobs: ', len(df))
 df.to_csv(f"{folder_path}/jobs.csv",  sep=';', index=False)
 
-
-
 def merge_txt_files(files: List[str], output_file: str):
     with open(output_file, "w", encoding="utf-8") as out:
         for file in files:
