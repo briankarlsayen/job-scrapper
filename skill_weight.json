@@ -1,0 +1,22 @@
+{
+  "Programming Languages": 1.0,
+  "Databases": 0.875,
+  "Data Science & ML": 0.875,
+  "AI Tools": 0.875,
+  "Cloud & DevOps (General)": 0.75,
+  "AWS Ecosystem": 0.75,
+  "Microsoft Cloud Ecosystem": 0.625,
+  "Java Ecosystem": 0.625,
+  "Microsoft / .NET Ecosystem": 0.625,
+  "Web Development": 0.625,
+  "JavaScript Libraries": 0.5,
+  "Mobile Development": 0.5,
+  "Vector Databases": 0.5,
+  "Analytics": 0.5,
+  "APIs & Testing": 0.375,
+  "Enterprise Software (ERP/CRM/Finance)": 0.375,
+  "Project & Workflow Tools": 0.25,
+  "Processes & Certifications": 0.25,
+  "Scala Ecosystem": 0.25,
+  "Other Tools": 0.1
+}

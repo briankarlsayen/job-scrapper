@@ -129,7 +129,6 @@ def skill_extraction(content: str) -> List[str]:
 
     return list(set(normalize_array(cleaned_skills, normalize_skills_dict)))
 
-
 def validate_job_title(title: str) -> bool:
     invalid_keywords = ["devops",  "servicenow", "qa", "quality assurance", "data", "solution", "shopify",  "salesforce", "japanese", "microsoft", "cloud", "automation", 
                    "SAP", "CRM", "game producer", "azure integration", "SEO specialist", "google ads", "web designer", "campaign executive",

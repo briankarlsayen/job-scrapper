@@ -126,7 +126,10 @@ while True:
         extraction_list = [title_text] + requirement_list
         required_skills = skill_extraction("\n".join(extraction_list))
 
-        job_requirement_list.extend(["Title: " + title_text, "Company: " + company_text, "Link: " + raw_link, "Requirements:"])
+        job_requirement_list.extend(["Title: " + title_text if title_text else "N/A", 
+                                     "Company: " + company_text if company_text else "N/A", 
+                                     "Link: " + raw_link if raw_link else "N/A", 
+                                     "Requirements:"])
         job_requirement_list.extend(requirement_list)
         # <---------- SKILLS section
         job_requirement_list.extend(['Skills:'])
