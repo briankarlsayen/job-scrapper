@@ -29,7 +29,7 @@ TODOS
 --- [x] create text file that shows the inputed skills for the ranked_jobs file
 [x] make error handler for main when scraper failed, run it 3x
 [x] add this to ranking to main file
-[ ] fix the ranked_jobs file, still include the unmatched jobs, watch for changes in scores
+[x] fix the ranked_jobs file, still include the unmatched jobs, watch for changes in scores
 [ ] automatic running: by my pc or raspi
 
 TIPS:

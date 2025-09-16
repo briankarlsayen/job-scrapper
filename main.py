@@ -17,20 +17,23 @@ os.makedirs(folder_path, exist_ok=True)
 
 csv_files = [f"{folder_path}/jobstreet.csv", f"{folder_path}/linkedin.csv"]
 
-scraper = {}
-scraper['linkedin'] = {
-    'file': 'linkedin.py',
-    'csv': f"{folder_path}/linkedin.csv"
+scraper = {
+    'linkedin': {
+        'file': 'linkedin.py',
+        'csv': f"{folder_path}/linkedin.csv"
+    },
+    'jobstreet': {
+        'file': 'jobstreet.py',
+        'csv':f"{folder_path}/jobstreet.csv"
+    }
 }
-scraper['jobstreet'] = {
-    'file': 'jobstreet.py',
-    'csv':f"{folder_path}/jobstreet.csv"
-}
+
 to_process_exist_list = []
 for key, data in scraper.items():
     if not os.path.exists(data.get("csv")):
         to_process_exist_list.append(data.get('file'))
 
+# RUN scrapers, retry 3 times once failed
 for script in to_process_exist_list:
     success = False
     for attempt in range(1, 4):  # try 3 times max
@@ -54,24 +57,21 @@ for script in to_process_exist_list:
         print(f"⚠️ Skipping {script} after 3 failed attempts")
 
 
-# read data from todays csv
+# READ data from created csv's
 dfs = []
 for key, data in scraper.items():
     item = pd.read_csv(data.get('csv'), delimiter=";")
     dfs.append(item)
-
-# OLD jobs
 df = pd.concat(dfs, ignore_index=True)
-df.to_csv(f"{folder_path}/jobs.csv",  sep=';', index=False)
+df.to_csv(f"{folder_path}/jobs.csv",  sep=';', index=False) # CREATE jobs.csv file
 print('jobs: ', len(df))
 
 
-# UPDATED jobs
+# CREATE ranked_jobs.csv file
 input_skills = ['python', 'Javascript', 'Typescript', 'nosql', 'sql', 'express', 'nodejs', 'reactjs', 'django', 'vuejs', 'mongodb', 'postgresql', 'mysql', 'next.js', 'html', 'css', 'aws', 'azure', 's3', 'zustand', 'redux', 'git', 'gitlab', 'vercel', 'jira','ci/cd', 'rest api', 'docker', 'linux', 'windows', 'mui', 'tailwindcss', 'jest', 'github']
 ranked_skill = rank_jobs_by_skills(df=df, input_skills=input_skills)
 updated_df = pd.DataFrame(ranked_skill)
-updated_df.to_csv(f"{folder_path}/ranked_jobs.csv", sep=';', index=False)
-
+updated_df.to_csv(f"{folder_path}/jobs.csv", sep=';', index=False)
 
 def merge_txt_files(files: List[str], output_file: str):
     with open(output_file, "w", encoding="utf-8") as out:
