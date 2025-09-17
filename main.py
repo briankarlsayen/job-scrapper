@@ -5,7 +5,6 @@ import sys
 import subprocess
 import time
 from typing import List 
-from constant import SEPARATOR
 from ranking import rank_jobs_by_skills
 
 today = date.today()
@@ -15,16 +14,20 @@ formatted_date = today.strftime("%Y_%m_%d")
 folder_path = f"datas/{formatted_date}"
 os.makedirs(folder_path, exist_ok=True)
 
+jobs_csv_file_path = f"{folder_path}/jobs.csv"
+
 csv_files = [f"{folder_path}/jobstreet.csv", f"{folder_path}/linkedin.csv"]
 
 scraper = {
     'linkedin': {
         'file': 'linkedin.py',
-        'csv': f"{folder_path}/linkedin.csv"
+        'csv': f"{folder_path}/linkedin.csv",
+        'txt':  f"{folder_path}/linkedin.txt"
     },
     'jobstreet': {
         'file': 'jobstreet.py',
-        'csv':f"{folder_path}/jobstreet.csv"
+        'csv':f"{folder_path}/jobstreet.csv",
+        'txt':f"{folder_path}/jobstreet.txt"
     }
 }
 
@@ -61,6 +64,7 @@ for script in to_process_exist_list:
 dfs = []
 for key, data in scraper.items():
     item = pd.read_csv(data.get('csv'), delimiter=";")
+    item['source'] = key
     dfs.append(item)
 df = pd.concat(dfs, ignore_index=True)
 df.to_csv(f"{folder_path}/jobs.csv",  sep=';', index=False) # CREATE jobs.csv file
@@ -71,7 +75,7 @@ print('jobs: ', len(df))
 input_skills = ['python', 'Javascript', 'Typescript', 'nosql', 'sql', 'express', 'nodejs', 'reactjs', 'django', 'vuejs', 'mongodb', 'postgresql', 'mysql', 'next.js', 'html', 'css', 'aws', 'azure', 's3', 'zustand', 'redux', 'git', 'gitlab', 'vercel', 'jira','ci/cd', 'rest api', 'docker', 'linux', 'windows', 'mui', 'tailwindcss', 'jest', 'github']
 ranked_skill = rank_jobs_by_skills(df=df, input_skills=input_skills)
 updated_df = pd.DataFrame(ranked_skill)
-updated_df.to_csv(f"{folder_path}/jobs.csv", sep=';', index=False)
+updated_df.to_csv(f"{folder_path}/ranked_jobs.csv", sep=';', index=False)
 
 def merge_txt_files(files: List[str], output_file: str):
     with open(output_file, "w", encoding="utf-8") as out:
@@ -81,3 +85,10 @@ def merge_txt_files(files: List[str], output_file: str):
 
 files_to_merge = [f"{folder_path}/jobstreet.txt", f"{folder_path}/linkedin.txt"]
 merge_txt_files(files_to_merge, f"{folder_path}/jobs.txt")
+
+# DELETE files
+if os.path.exists(jobs_csv_file_path):
+    os.remove(scraper['jobstreet']['csv'])
+    os.remove(scraper['jobstreet']['txt'])
+    os.remove(scraper['linkedin']['csv'])
+    os.remove(scraper['linkedin']['txt'])

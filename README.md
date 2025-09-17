@@ -30,6 +30,7 @@ TODOS
 [x] make error handler for main when scraper failed, run it 3x
 [x] add this to ranking to main file
 [x] fix the ranked_jobs file, still include the unmatched jobs, watch for changes in scores
+[x] when jobs.csv exist delete duplicate csv and txt files
 [ ] automatic running: by my pc or raspi
 
 TIPS:
@@ -37,6 +38,9 @@ TIPS:
 - to get skills I need data from others: ask skills from others, get skills from resume, etc
 
 BUGS
+[ ] lkd access scroll bottom to full content
 [ ] C not listed when C, C++ exist
 [ ] Git not listed when Git/Github
-[ ] lkd access scroll bottom to full content
+
+ENCHANCEMENT
+[ ] create a test file, for improvement checking
