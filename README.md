@@ -31,16 +31,22 @@ TODOS
 [x] add this to ranking to main file
 [x] fix the ranked_jobs file, still include the unmatched jobs, watch for changes in scores
 [x] when jobs.csv exist delete duplicate csv and txt files
+[ ] lk scroll loading
+--- [ ] fix unreliable modal clicker, if not clicked stop operation
+--- [ ] apply to main file
 [ ] automatic running: by my pc or raspi
+--- [ ] run headless
+--- [ ] dockerize run
+--- [ ] job docker run
 
 TIPS:
 
 - to get skills I need data from others: ask skills from others, get skills from resume, etc
 
 BUGS
-[ ] lkd access scroll bottom to full content
 [ ] C not listed when C, C++ exist
 [ ] Git not listed when Git/Github
+[x] test linkedin not equal number scraped, test for duplicate titles, lk not logged has duplicate jobs(sites problem issue)
 
 ENCHANCEMENT
 [ ] create a test file, for improvement checking
