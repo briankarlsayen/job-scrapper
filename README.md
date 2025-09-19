@@ -31,9 +31,10 @@ TODOS
 [x] add this to ranking to main file
 [x] fix the ranked_jobs file, still include the unmatched jobs, watch for changes in scores
 [x] when jobs.csv exist delete duplicate csv and txt files
-[ ] lk scroll loading
---- [ ] fix unreliable modal clicker, if not clicked stop operation
---- [ ] apply to main file
+[x] lk scroll loading
+--- [x] fix unreliable modal clicker, if not clicked stop operation
+--- [x] apply to main file
+[ ] get all ul,li, and strings with bullet points for requirements
 [ ] automatic running: by my pc or raspi
 --- [ ] run headless
 --- [ ] dockerize run
@@ -47,6 +48,7 @@ BUGS
 [ ] C not listed when C, C++ exist
 [ ] Git not listed when Git/Github
 [x] test linkedin not equal number scraped, test for duplicate titles, lk not logged has duplicate jobs(sites problem issue)
+[ ] handle if scraper failed, do not create a csv
 
 ENCHANCEMENT
 [ ] create a test file, for improvement checking

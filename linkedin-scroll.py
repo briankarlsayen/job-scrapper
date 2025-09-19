@@ -75,6 +75,23 @@ def safe_find_element(parent, by: By, value: str):
         return parent.find_element(by, value)
     except NoSuchElementException:
         return None
+    
+def is_loading_shown(driver) -> bool:
+    loader_element = safe_find_element(driver, By.CSS_SELECTOR, ".loader.loader--show")
+    if not loader_element:
+        return False
+    if loader_element.is_displayed():
+        return True
+    return False
+
+def is_viewed_all_shown(driver) -> bool:
+    viewed_all_element = safe_find_element(driver, By.CLASS_NAME, "see-more-jobs__viewed-all")
+    if not viewed_all_element:
+        return False
+    if viewed_all_element.is_displayed():
+        return True
+    return False
+        
 
 # make duplicate logic break when consecutive dups > 10 
 def process_job_scrape():
@@ -83,35 +100,40 @@ def process_job_scrape():
     wait = WebDriverWait(driver, 30)
     duplicates = 0 
 
-
-    def close_modal(driver): # TODO when this failed stop script
+    def close_modal(driver) -> bool:
         retry = 3
+        retry_failed = False
         while True:
-            print('run close modal')
             try:
-                # TODO fix this, find the modals css when modal becomes hidden
-                overlay = wait.until(
-                    EC.presence_of_element_located((By.CSS_SELECTOR, "div.modal__overlay"))
+                modal_container = wait.until(
+                    EC.presence_of_element_located((By.CSS_SELECTOR, "div.top-level-modal-container"))
                 )
-                classes = overlay.get_attribute("class")
-                # close_button = overlay.find_element(By.XPATH, "//button[contains(@class, 'modal__dismiss')]")
-                # close_button = safe_find_element(overlay, By.XPATH, "//button[contains(@class, 'modal__dismiss')]")
+
+                overlay = safe_find_element(modal_container, By.CSS_SELECTOR, "div.modal__overlay")
+                if not overlay:
+                    break
+
                 close_button = overlay.find_element(By.XPATH, "//button[contains(@class, 'modal__dismiss')]")
                 driver.execute_script("arguments[0].click();", close_button)
 
-                if "invisible" in classes.split():
-                    print("Login modal closed ✅")
-                    break
-                elif retry <=0:
-                    print('Retries failed')
+                if retry <=0:
+                    retry_failed = True
                     break
                 retry -= 1
                 time.sleep(3)
             except Exception as e:
                 print("No modal or not clickable:", e)
+        if retry_failed:
+            print('Retries Failed')
+            return False
+        else:
+            print('Successfully closed modal')
+            return True
 
     time.sleep(5)
-    close_modal(driver)
+    success = close_modal(driver)
+    if not success:
+        return
     time.sleep(1)
 
     # driver.refresh()
@@ -119,80 +141,55 @@ def process_job_scrape():
     # close_modal(driver)
     # time.sleep(1)
 
+   
+    def load_all_jobs():
+        found_end = False        
+        loading_shown = False
+        loading_retry = 3
+        success = False
 
-
-    def is_loading_shown() -> bool:
-        loader_element = safe_find_element(driver, By.CSS_SELECTOR, ".loader.loader--show")
-        if not loader_element:
-            return False
-        if loader_element.is_displayed():
-            return True
-        return False
-    
-    def is_viewed_all_shown() -> bool:
-        viewed_all_element = safe_find_element(driver, By.CLASS_NAME, "see-more-jobs__viewed-all")
-        if not viewed_all_element:
-            return False
-        if viewed_all_element.is_displayed():
-            return True
-        return False
-    
-    found_end = False        
-    loader_timeout = False
-    loading_shown = False
-    loading_retry = 3
-
-    while True:
-        # Scroll to bottom of results list
-        if is_viewed_all_shown():
-            print('end of list')
-            break
-
-        if loading_shown:
-            print('retry')
-            if loading_retry <= 0:
-                found_end = True
+        while True:
+            if is_viewed_all_shown(driver):
+                success = True
                 break
-            elif is_loading_shown():
-                loading_retry -= 1
-            else:
-                loading_retry = 3
-                loading_shown = False
-            time.sleep(1)
 
-        for _ in range(10):
-            print('scrolling')
-            if found_end or loading_shown:
-                break
-            for _ in range(30):
-                driver.execute_script("window.scrollBy(0, 500);")
-                time.sleep(random.uniform(0.5, 1.5))
-                if is_viewed_all_shown():
+            if loading_shown:
+                if loading_retry <= 0:
                     found_end = True
                     break
-                elif is_loading_shown():
-                    print('loading found')
-                    # found_end = True
-                    loading_shown = True
-                    time.sleep(5) # wait for loading to stop
+                elif is_loading_shown(driver):
+                    loading_retry -= 1
+                else:
+                    loading_retry = 3
+                    loading_shown = False
+                time.sleep(2)
+
+            for _ in range(10):
+                if found_end or loading_shown:
                     break
+                for _ in range(30):
+                    driver.execute_script("window.scrollBy(0, 500);")
+                    time.sleep(random.uniform(0.5, 1.5))
+                    if is_viewed_all_shown(driver):
+                        found_end = True
+                        break
+                    elif is_loading_shown(driver):
+                        loading_shown = True
+                        time.sleep(5) # wait for loading to stop
+                        break
 
-                loading_shown = False
-                loading_retry = 3
-            time.sleep(2)
-        # try:
-        #     # Wait for loader to show up
-        #     loader = safe_find_element(driver, By.CSS_SELECTOR, ".loader.loader--show")
-        #     # Wait until loader disappears (new jobs loaded)
-        #     wait.until(EC.invisibility_of_element(loader))
-        # except Exception:
-        #     # No loader means no more jobs
-        #     print('No more jobs to load')
-        #     break
+                    loading_shown = False
+                    loading_retry = 3
+                time.sleep(2)
 
-        if found_end:
-            print('done process jobs')
-            break
+            if found_end:
+                break
+        
+        return success
+    
+    success = load_all_jobs() # handle scroll lazy loading
+    if not success:
+        print('Processing partial jobs')
 
     job_cards = []
     try:
