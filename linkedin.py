@@ -13,6 +13,7 @@ from utils import save_to_textfile, skill_extraction, validate_job_title
 from selenium.common.exceptions import NoSuchElementException
 from constant import PREFERRED_KEYWORDS, REQ_KEYWORDS, BULLET_CHARS
 from selenium.webdriver.chrome.service import Service
+import sys
 
 print('start')
 # Configure Selenium (headless Chrome)
@@ -43,30 +44,54 @@ def extract_section(container, headers):
     if not container:
         return []
     results = set()
-    header_tag = container.find(
-        lambda tag: tag.name in ["h2", "h3", "h4", "p", "strong"]
-        and any(h.lower() in tag.get_text(strip=True).lower() for h in headers)
-    )
 
-    if not header_tag:
-        return []
-    for sibling in header_tag.find_all_next():
-        if sibling.name in ["button"]:
-            break  # stop at next section header
-        if sibling.name == "ul":
-            for li in sibling.find_all("li"):
-                text = li.get_text(strip=True)
-                if text:  # skip empty
-                    results.add(text)
-        elif sibling.string:
-            raw_text = sibling.get_text(strip=True)
-            if raw_text and any(raw_text.startswith(b) for b in BULLET_CHARS):
-                cleaned = raw_text.lstrip("".join(BULLET_CHARS)).replace("\xa0", " ")
-                cleaned = " ".join(cleaned.split())  # normalize spaces
-                if cleaned:
-                    results.add(cleaned)
+    elements = container.find_all(string=True)
+    for el in elements:
+        raw_text = el.get_text(strip=True)
+        if raw_text and any(raw_text.startswith(b) for b in BULLET_CHARS):
+            cleaned = raw_text.lstrip("".join(BULLET_CHARS)).replace("\xa0", " ")
+            cleaned = " ".join(cleaned.split())  # normalize spaces
+            if cleaned:
+                results.add(cleaned)
+    
+    uls = container.find_all("ul")
+    for ul in uls:
+        lis = ul.find_all("li")
+        for li in lis:
+            text = li.get_text(" ", strip=True)
+            if text:
+                results.add(text)
 
     return list(results)
+
+# def extract_section(container, headers):
+#     if not container:
+#         return []
+#     results = set()
+#     header_tag = container.find(
+#         lambda tag: tag.name in ["h2", "h3", "h4", "p", "strong"]
+#         and any(h.lower() in tag.get_text(strip=True).lower() for h in headers)
+#     )
+
+#     if not header_tag:
+#         return []
+#     for sibling in header_tag.find_all_next():
+#         if sibling.name in ["button"]:
+#             break  # stop at next section header
+#         if sibling.name == "ul":
+#             for li in sibling.find_all("li"):
+#                 text = li.get_text(strip=True)
+#                 if text:  # skip empty
+#                     results.add(text)
+#         elif sibling.string:
+#             raw_text = sibling.get_text(strip=True)
+#             if raw_text and any(raw_text.startswith(b) for b in BULLET_CHARS):
+#                 cleaned = raw_text.lstrip("".join(BULLET_CHARS)).replace("\xa0", " ")
+#                 cleaned = " ".join(cleaned.split())  # normalize spaces
+#                 if cleaned:
+#                     results.add(cleaned)
+
+#     return list(results)
 
 def safe_find_element(parent, by: By, value: str):
     try:
@@ -280,8 +305,17 @@ def process_job_scrape(driver):
     
 retry = True
 while retry:
-    retry = process_job_scrape(driver)
+    try:
+        retry = process_job_scrape(driver)
+    except Exception as e:
+        print('Error :', e)
+
 driver.quit()
+
+if not job_requirement_list or not jobs:
+    sys.exit(1)
 
 create_job_folder(folder_name=formatted_date, file_name="linkedin", text_content="\n".join(job_requirement_list), csv_content=jobs)
 print(f"Scraped {len(jobs)} jobs from Linkedin.")
+
+

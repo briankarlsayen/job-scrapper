@@ -13,6 +13,7 @@ from utils import save_to_textfile, skill_extraction, validate_job_title
 from selenium.common.exceptions import NoSuchElementException
 from constant import PREFERRED_KEYWORDS, REQ_KEYWORDS, BULLET_CHARS
 from typing import List
+import sys
 
 driver = webdriver.Chrome()
 driver.set_window_size(1920, 1080)
@@ -30,34 +31,86 @@ formatted_date = today.strftime("%Y_%m_%d")
 job_requirement_list = []
 
 def extract_section(container, headers) -> List[str]:
+    # if not container:
+    #     return []
+    # results = set()
+    # header_tag = container.find(
+    #     lambda tag: tag.name in ["h2", "h3", "h4", "p", "strong"]
+    #     and any(h.lower() in tag.get_text(strip=True).lower() for h in headers)
+    # )
+
+    # if not header_tag:
+    #     return []
+    # for sibling in header_tag.find_all_next():
+    #     if sibling.name in ["button"]:
+    #         break  # stop at next section header
+    #     if sibling.name == "ul":
+    #         for li in sibling.find_all("li"):
+    #             text = li.get_text(strip=True)
+    #             if text:  # skip empty
+    #                 results.add(text)
+    #     elif sibling.string:
+    #         raw_text = sibling.get_text(strip=True)
+    #         if raw_text and any(raw_text.startswith(b) for b in BULLET_CHARS):
+    #             cleaned = raw_text.lstrip("".join(BULLET_CHARS)).replace("\xa0", " ")
+    #             cleaned = " ".join(cleaned.split())  # normalize spaces
+    #             if cleaned:
+    #                 results.add(cleaned)
     if not container:
         return []
     results = set()
-    header_tag = container.find(
-        lambda tag: tag.name in ["h2", "h3", "h4", "p", "strong"]
-        and any(h.lower() in tag.get_text(strip=True).lower() for h in headers)
-    )
 
-    if not header_tag:
-        return []
-    for sibling in header_tag.find_all_next():
-        if sibling.name in ["button"]:
-            break  # stop at next section header
-        if sibling.name == "ul":
-            for li in sibling.find_all("li"):
-                text = li.get_text(strip=True)
-                if text:  # skip empty
-                    results.add(text)
-        elif sibling.string:
-            raw_text = sibling.get_text(strip=True)
-            if raw_text and any(raw_text.startswith(b) for b in BULLET_CHARS):
-                cleaned = raw_text.lstrip("".join(BULLET_CHARS)).replace("\xa0", " ")
-                cleaned = " ".join(cleaned.split())  # normalize spaces
-                if cleaned:
-                    results.add(cleaned)
+    # for li in container.find_all("li"):
+    #     results.add(li.get_text(strip=True))
+
+    # Add all bullet-prefixed texts
+    # for el in container.find_all(string=True):
+    #     text = el.strip()
+    #     if text.startswith("•"):
+    #         results.add(text)
+
+    elements = container.find_all(string=True)
+    for el in elements:
+        raw_text = el.get_text(strip=True)
+        if raw_text and any(raw_text.startswith(b) for b in BULLET_CHARS):
+            cleaned = raw_text.lstrip("".join(BULLET_CHARS)).replace("\xa0", " ")
+            cleaned = " ".join(cleaned.split())  # normalize spaces
+            if cleaned:
+                results.add(cleaned)
+    
+    uls = container.find_all("ul")
+    for ul in uls:
+        lis = ul.find_all("li")
+        for li in lis:
+            text = li.get_text(" ",strip=True)
+            if text:
+                results.add(text)
+
+    # elements = content_container.find_all(text=True)
+    # for el in elements:
+    #     raw_text = el.get_text(strip=True)
+    #     if raw_text and any(raw_text.startswith(b) for b in BULLET_CHARS):
+    #         cleaned = raw_text.lstrip("".join(BULLET_CHARS)).replace("\xa0", " ")
+    #         cleaned = " ".join(cleaned.split())  # normalize spaces
+    #         if cleaned:
+    #             results.add(cleaned)
+
+    # if sibling.name in ["button"]:
+    #     break  # stop at next section header
+    # if sibling.name == "ul":
+    #     for li in sibling.find_all("li"):
+    #         text = li.get_text(strip=True)
+    #         if text:  # skip empty
+    #             results.add(text)
+    # elif sibling.string:
+    #     raw_text = sibling.get_text(strip=True)
+    #     if raw_text and any(raw_text.startswith(b) for b in BULLET_CHARS):
+    #         cleaned = raw_text.lstrip("".join(BULLET_CHARS)).replace("\xa0", " ")
+    #         cleaned = " ".join(cleaned.split())  # normalize spaces
+    #         if cleaned:
+    #             results.add(cleaned)
 
     return list(results)
-
 
 def safe_find_element(parent, by: By, value: str):
     try:
@@ -65,6 +118,19 @@ def safe_find_element(parent, by: By, value: str):
     except NoSuchElementException:
         return None
 
+def create_job_folder(folder_name: str, file_name: str, text_content: str, csv_content: list):
+    text_file_name = f"{file_name}.txt"
+    csv_file_name = f"{file_name}.csv"
+    folder_path =  os.path.join("datas", folder_name)
+    os.makedirs(folder_path, exist_ok=True)
+    text_file_path = os.path.join(folder_path, text_file_name)
+    csv_file_path = os.path.join(folder_path, csv_file_name)
+
+    # create text file
+    save_to_textfile(text_file_path, text_content)
+    # create csv file
+    df = pd.DataFrame(csv_content)
+    df.to_csv(csv_file_path, sep=';', index=False)
 
 while True:
     BASE_URL = f"https://ph.jobstreet.com/web-developer-jobs?daterange=1&pos=1&salaryrange=70000-&salarytype=monthly&workarrangement=2%2C3&page={page}"
@@ -95,9 +161,9 @@ while True:
 
         title_tag = safe_find_element(job, By.CSS_SELECTOR, "a[data-automation=jobTitle]")
         title_text = title_tag.text.strip() if title_tag else None
-        if not validate_job_title(title_text):
-            print('Not valid job :', title_text)
-            continue
+        # if not validate_job_title(title_text):
+        #     print('Not valid job :', title_text)
+        #     continue
 
         raw_link = title_tag.get_attribute("href") if title_tag else None
         company_tag = safe_find_element(job, By.CSS_SELECTOR, "a[data-automation=jobCompany]")
@@ -118,7 +184,8 @@ while True:
 
         headers = PREFERRED_KEYWORDS + REQ_KEYWORDS
         soup = BeautifulSoup(driver.page_source, "html.parser")
-        job_description = soup.select_one("div", {"data-automation": "splitViewJobDetailsWrapper"})
+        job_description = soup.select_one('div[data-automation="jobAdDetails"]')
+        # job_description = soup.select_one("div", {"data-automation": "splitViewJobDetailsWrapper"})
         if not job_description:
             continue
 
@@ -147,6 +214,7 @@ while True:
             "scraped_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             "job_link": f"https://ph.jobstreet.com{raw_link}" if raw_link else "N/A",
         })
+    # break
     page += 1
 
     if duplicates >= 5:
@@ -157,19 +225,9 @@ while True:
 
 driver.quit()
 
-def create_job_folder(folder_name: str, file_name: str, text_content: str, csv_content: list):
-    text_file_name = f"{file_name}.txt"
-    csv_file_name = f"{file_name}.csv"
-    folder_path =  os.path.join("datas", folder_name)
-    os.makedirs(folder_path, exist_ok=True)
-    text_file_path = os.path.join(folder_path, text_file_name)
-    csv_file_path = os.path.join(folder_path, csv_file_name)
 
-    # create text file
-    save_to_textfile(text_file_path, text_content)
-    # create csv file
-    df = pd.DataFrame(csv_content)
-    df.to_csv(csv_file_path, sep=';', index=False)
+if not job_requirement_list or not jobs:
+    sys.exit(1)
 
 create_job_folder(folder_name=formatted_date, file_name="jobstreet", text_content="\n".join(job_requirement_list), csv_content=jobs)
 print(f"Scraped {len(jobs)} jobs from Jobstreet.")
