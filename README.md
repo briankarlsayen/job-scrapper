@@ -34,11 +34,10 @@ TODOS
 [x] lk scroll loading
 --- [x] fix unreliable modal clicker, if not clicked stop operation
 --- [x] apply to main file
-[ ] get all ul,li, and strings with bullet points for requirements
-[ ] automatic running: by my pc or raspi
---- [ ] run headless
---- [ ] dockerize run
---- [ ] job docker run
+[x] get all ul,li, and strings with bullet points for requirements
+[x] automatic running: by my pc or raspi
+--- [x] run headless
+--- [ ] if cron time today has passed, run in at once (check anacron)
 
 TIPS:
 
@@ -48,7 +47,7 @@ BUGS
 [ ] C not listed when C, C++ exist
 [ ] Git not listed when Git/Github
 [x] test linkedin not equal number scraped, test for duplicate titles, lk not logged has duplicate jobs(sites problem issue)
-[ ] handle if scraper failed, do not create a csv
+[x] handle if scraper failed, do not create a csv
 
 ENCHANCEMENT
 [ ] create a test file, for improvement checking
