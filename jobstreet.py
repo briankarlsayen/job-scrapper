@@ -11,11 +11,22 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from utils import save_to_textfile, skill_extraction, validate_job_title
 from selenium.common.exceptions import NoSuchElementException
-from constant import PREFERRED_KEYWORDS, REQ_KEYWORDS, BULLET_CHARS
+from constant import BULLET_CHARS, SEPARATOR
 from typing import List
 import sys
 
-driver = webdriver.Chrome()
+options = Options()
+# options.add_argument("--headless")
+options.add_argument("--headless=new")
+options.add_argument("--disable-gpu")
+options.add_argument("--window-size=1920,1080")
+options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                     "AppleWebKit/537.36 (KHTML, like Gecko) "
+                     "Chrome/115.0.0.0 Safari/537.36")
+options.add_argument("--disable-blink-features=AutomationControlled")
+options.add_experimental_option("excludeSwitches", ["enable-automation"])
+options.add_experimental_option('useAutomationExtension', False)
+driver = webdriver.Chrome(options=options)
 driver.set_window_size(1920, 1080)
 
 jobs = []
@@ -24,50 +35,16 @@ seen_links = set()
 duplicates = 0
 PAGE_LIMIT = 10
 page_item_count = 25
-separator = "================================================================"
+separator = SEPARATOR
 
 today = date.today()
 formatted_date = today.strftime("%Y_%m_%d")
 job_requirement_list = []
 
-def extract_section(container, headers) -> List[str]:
-    # if not container:
-    #     return []
-    # results = set()
-    # header_tag = container.find(
-    #     lambda tag: tag.name in ["h2", "h3", "h4", "p", "strong"]
-    #     and any(h.lower() in tag.get_text(strip=True).lower() for h in headers)
-    # )
-
-    # if not header_tag:
-    #     return []
-    # for sibling in header_tag.find_all_next():
-    #     if sibling.name in ["button"]:
-    #         break  # stop at next section header
-    #     if sibling.name == "ul":
-    #         for li in sibling.find_all("li"):
-    #             text = li.get_text(strip=True)
-    #             if text:  # skip empty
-    #                 results.add(text)
-    #     elif sibling.string:
-    #         raw_text = sibling.get_text(strip=True)
-    #         if raw_text and any(raw_text.startswith(b) for b in BULLET_CHARS):
-    #             cleaned = raw_text.lstrip("".join(BULLET_CHARS)).replace("\xa0", " ")
-    #             cleaned = " ".join(cleaned.split())  # normalize spaces
-    #             if cleaned:
-    #                 results.add(cleaned)
+def extract_section(container) -> List[str]:
     if not container:
         return []
     results = set()
-
-    # for li in container.find_all("li"):
-    #     results.add(li.get_text(strip=True))
-
-    # Add all bullet-prefixed texts
-    # for el in container.find_all(string=True):
-    #     text = el.strip()
-    #     if text.startswith("•"):
-    #         results.add(text)
 
     elements = container.find_all(string=True)
     for el in elements:
@@ -85,30 +62,6 @@ def extract_section(container, headers) -> List[str]:
             text = li.get_text(" ",strip=True)
             if text:
                 results.add(text)
-
-    # elements = content_container.find_all(text=True)
-    # for el in elements:
-    #     raw_text = el.get_text(strip=True)
-    #     if raw_text and any(raw_text.startswith(b) for b in BULLET_CHARS):
-    #         cleaned = raw_text.lstrip("".join(BULLET_CHARS)).replace("\xa0", " ")
-    #         cleaned = " ".join(cleaned.split())  # normalize spaces
-    #         if cleaned:
-    #             results.add(cleaned)
-
-    # if sibling.name in ["button"]:
-    #     break  # stop at next section header
-    # if sibling.name == "ul":
-    #     for li in sibling.find_all("li"):
-    #         text = li.get_text(strip=True)
-    #         if text:  # skip empty
-    #             results.add(text)
-    # elif sibling.string:
-    #     raw_text = sibling.get_text(strip=True)
-    #     if raw_text and any(raw_text.startswith(b) for b in BULLET_CHARS):
-    #         cleaned = raw_text.lstrip("".join(BULLET_CHARS)).replace("\xa0", " ")
-    #         cleaned = " ".join(cleaned.split())  # normalize spaces
-    #         if cleaned:
-    #             results.add(cleaned)
 
     return list(results)
 
@@ -182,14 +135,13 @@ while True:
         items += 1
         time.sleep(8)
 
-        headers = PREFERRED_KEYWORDS + REQ_KEYWORDS
         soup = BeautifulSoup(driver.page_source, "html.parser")
         job_description = soup.select_one('div[data-automation="jobAdDetails"]')
         # job_description = soup.select_one("div", {"data-automation": "splitViewJobDetailsWrapper"})
         if not job_description:
             continue
 
-        requirement_list = extract_section(job_description, headers)
+        requirement_list = extract_section(job_description)
         extraction_list = [title_text] + requirement_list
         required_skills = skill_extraction("\n".join(extraction_list))
 
@@ -214,7 +166,6 @@ while True:
             "scraped_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             "job_link": f"https://ph.jobstreet.com{raw_link}" if raw_link else "N/A",
         })
-    # break
     page += 1
 
     if duplicates >= 5:

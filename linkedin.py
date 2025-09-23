@@ -11,36 +11,32 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from utils import save_to_textfile, skill_extraction, validate_job_title
 from selenium.common.exceptions import NoSuchElementException
-from constant import PREFERRED_KEYWORDS, REQ_KEYWORDS, BULLET_CHARS
+from constant import BULLET_CHARS, SEPARATOR
 from selenium.webdriver.chrome.service import Service
 import sys
 
-print('start')
-# Configure Selenium (headless Chrome)
-# brave_path = "/snap/bin/brave"
-
 options = Options()
-# options.add_argument("--headless")
+options.add_argument("--headless=new")
 options.add_argument("--disable-gpu")
 options.add_argument("--window-size=1920,1080")
-# options.binary_location = brave_path
-# service = Service("/usr/bin/chromedriver")
+# options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+#                      "AppleWebKit/537.36 (KHTML, like Gecko) "
+#                      "Chrome/115.0.0.0 Safari/537.36")
+options.add_argument("--disable-blink-features=AutomationControlled")
+options.add_experimental_option("excludeSwitches", ["enable-automation"])
+options.add_experimental_option('useAutomationExtension', False)
 driver = webdriver.Chrome(options=options)
 driver.set_window_size(1920, 1080)
 
 jobs = []
-page = 0
 seen_links = set()
-duplicates = 0
-PAGE_LIMIT = 10
-page_item_count = 25
-separator = "================================================================"
+separator = SEPARATOR
 
 today = date.today()
 formatted_date = today.strftime("%Y_%m_%d")
 job_requirement_list = []
 
-def extract_section(container, headers):
+def extract_section(container):
     if not container:
         return []
     results = set()
@@ -63,35 +59,6 @@ def extract_section(container, headers):
                 results.add(text)
 
     return list(results)
-
-# def extract_section(container, headers):
-#     if not container:
-#         return []
-#     results = set()
-#     header_tag = container.find(
-#         lambda tag: tag.name in ["h2", "h3", "h4", "p", "strong"]
-#         and any(h.lower() in tag.get_text(strip=True).lower() for h in headers)
-#     )
-
-#     if not header_tag:
-#         return []
-#     for sibling in header_tag.find_all_next():
-#         if sibling.name in ["button"]:
-#             break  # stop at next section header
-#         if sibling.name == "ul":
-#             for li in sibling.find_all("li"):
-#                 text = li.get_text(strip=True)
-#                 if text:  # skip empty
-#                     results.add(text)
-#         elif sibling.string:
-#             raw_text = sibling.get_text(strip=True)
-#             if raw_text and any(raw_text.startswith(b) for b in BULLET_CHARS):
-#                 cleaned = raw_text.lstrip("".join(BULLET_CHARS)).replace("\xa0", " ")
-#                 cleaned = " ".join(cleaned.split())  # normalize spaces
-#                 if cleaned:
-#                     results.add(cleaned)
-
-#     return list(results)
 
 def safe_find_element(parent, by: By, value: str):
     try:
@@ -129,7 +96,7 @@ def create_job_folder(folder_name: str, file_name: str, text_content: str, csv_c
     df = pd.DataFrame(csv_content)
     df.to_csv(csv_file_path, sep=';', index=False)
 
-        
+      
 def process_job_scrape(driver):
     retry = False
     BASE_URL = f"https://www.linkedin.com/jobs/search?keywords=Software%20Engineer&location=Philippines&geoId=103121230&f_TPR=r86400&f_WT=3%2C2&position=1"
@@ -262,6 +229,9 @@ def process_job_scrape(driver):
         job.click()
         items += 1 
         time.sleep(8)
+        
+        # if items > 5: # TODO test
+        #     break
 
         current_url = driver.current_url
         if "/jobs/view/" in current_url:
@@ -270,13 +240,12 @@ def process_job_scrape(driver):
             retry = True
             break
 
-        headers = PREFERRED_KEYWORDS + REQ_KEYWORDS
         soup = BeautifulSoup(driver.page_source, "html.parser")
         job_description = soup.select_one("div.show-more-less-html__markup")
         if not job_description:
             continue
 
-        requirement_list = extract_section(job_description, headers)
+        requirement_list = extract_section(job_description)
         extraction_list = [title_text] + requirement_list
         required_skills = skill_extraction("\n".join(extraction_list))
 
