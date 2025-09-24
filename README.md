@@ -35,9 +35,15 @@ TODOS
 --- [x] fix unreliable modal clicker, if not clicked stop operation
 --- [x] apply to main file
 [x] get all ul,li, and strings with bullet points for requirements
-[x] automatic running: by my pc or raspi
+[ ] automatic running: by my pc or raspi
 --- [x] run headless
+--- [x] test run on 2pm next day
 --- [ ] if cron time today has passed, run in at once (check anacron)
+[ ] save to data database
+--- [x] setup db schema
+--- [x] import csv data to db
+--- [ ] save new data to db
+[ ] data analysis
 
 TIPS:
 
@@ -51,3 +57,6 @@ BUGS
 
 ENCHANCEMENT
 [ ] create a test file, for improvement checking
+[ ] employment type(full time, contract, part time)
+[ ] salary(if range then max/min)
+[ ] work arrangement(remote, onsite, hybrid)

@@ -157,6 +157,10 @@ while True:
         # -------------------------->
         job_requirement_list.append(separator)
 
+        if raw_link:
+            if not raw_link.startswith('https://ph.jobstreet.com'):
+                raw_link =  "https://ph.jobstreet.com" + raw_link
+
         jobs.append({
             "title": title_text if title_text else "N/A",
             "company": company_text if company_text else "N/A",
@@ -164,7 +168,7 @@ while True:
             "required_skills": ",".join(required_skills) if len(required_skills) else "N/A",
             "date_posted": date_text if date_text else "N/A",
             "scraped_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            "job_link": f"https://ph.jobstreet.com{raw_link}" if raw_link else "N/A",
+            "job_link": raw_link if raw_link else "N/A",
         })
     page += 1
 

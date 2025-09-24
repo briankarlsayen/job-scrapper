@@ -2,3 +2,5 @@ datas/
 text/
 __pycache__/
 *.csv
+
+jobs.db

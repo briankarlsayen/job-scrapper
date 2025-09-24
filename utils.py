@@ -126,8 +126,9 @@ def skill_extraction(content: str) -> List[str]:
                 reverse_map[s.lower()] = canonical       # point synonyms to canonical
         return [reverse_map.get(v.lower(), v) for v in values]
     
+    lowercase_skills = [s.lower() for s in normalize_array(cleaned_skills, normalize_skills_dict)]
 
-    return list(set(normalize_array(cleaned_skills, normalize_skills_dict)))
+    return list(set(lowercase_skills))
 
 def validate_job_title(title: str) -> bool:
     invalid_keywords = ["devops",  "servicenow", "qa", "quality assurance", "data", "solution", "shopify",  "salesforce", "japanese", "microsoft", "cloud", "automation", 
