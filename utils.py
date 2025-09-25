@@ -3,6 +3,9 @@ import spacy
 from spacy.matcher import PhraseMatcher
 import json
 import re
+from pathlib import Path
+import sys
+from datetime import datetime
 
 def add_space_around_slash(text: str) -> str:
     pascal_case_space = re.sub(r'(?<=[a-z])(?=[A-Z])', ' ', text) if re.match(r'^[a-z]', text) else text
@@ -144,3 +147,12 @@ def validate_job_title(title: str) -> bool:
             return False
     return True
 
+def logger():
+    log_file = Path(__file__).parent / "logger.log"
+
+    def log(message):
+        with open(log_file, "a") as f:
+            f.write(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] {message}\n")
+    
+    source = sys.argv[1] if len(sys.argv) > 1 else "unknown"
+    log(f"Script triggered by: {source}")

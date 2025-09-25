@@ -1,7 +1,7 @@
 import os
-from logger import logger_script
+from utils import logger
 
-logger_script()
+logger()
 
 folder_path = "dummy"
 os.makedirs(folder_path, exist_ok=True)

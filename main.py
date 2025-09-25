@@ -1,16 +1,15 @@
 import os
 from datetime import date
 import pandas as pd
-import sys
 import subprocess
 import time
 from typing import List 
 from ranking import rank_jobs_by_skills
 from migration import migrate
-from logger import logger_script
+from utils import logger
 
 # run logger script
-logger_script()
+logger()
 
 today = date.today()
 formatted_date = today.strftime("%Y_%m_%d")
