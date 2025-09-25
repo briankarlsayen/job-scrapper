@@ -39,10 +39,14 @@ TODOS
 --- [x] run headless
 --- [x] test run on 2pm next day
 --- [ ] if cron time today has passed, run in at once (check anacron)
-[ ] save to data database
+[x] save to data database
 --- [x] setup db schema
 --- [x] import csv data to db
---- [ ] save new data to db
+--- [x] save new data to db
+[x] cron job
+--- [x] create cron job
+--- [x] handle missed job
+--- [x] create log when job triggered
 [ ] data analysis
 
 TIPS:

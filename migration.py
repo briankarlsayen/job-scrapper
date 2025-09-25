@@ -75,4 +75,4 @@ def migrate_all():
 
 # order: create_schema > migrate_all
 # create_schema()
-migrate_all()
+# migrate_all()

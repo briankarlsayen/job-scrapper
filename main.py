@@ -6,6 +6,11 @@ import subprocess
 import time
 from typing import List 
 from ranking import rank_jobs_by_skills
+from migration import migrate
+from logger import logger_script
+
+# run logger script
+logger_script()
 
 today = date.today()
 formatted_date = today.strftime("%Y_%m_%d")
@@ -85,6 +90,12 @@ def merge_txt_files(files: List[str], output_file: str):
 
 files_to_merge = [f"{folder_path}/jobstreet.txt", f"{folder_path}/linkedin.txt"]
 merge_txt_files(files_to_merge, f"{folder_path}/jobs.txt")
+
+# INSERT todays job data to db
+try: 
+    migrate(file=f"{folder_path}/jobs.csv")
+except:
+    print('Unable to save to database')
 
 # DELETE files
 if os.path.exists(jobs_csv_file_path):
