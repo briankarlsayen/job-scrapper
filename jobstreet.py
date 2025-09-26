@@ -71,20 +71,6 @@ def safe_find_element(parent, by: By, value: str):
     except NoSuchElementException:
         return None
 
-def create_job_folder(folder_name: str, file_name: str, text_content: str, csv_content: list):
-    text_file_name = f"{file_name}.txt"
-    csv_file_name = f"{file_name}.csv"
-    folder_path =  os.path.join("datas", folder_name)
-    os.makedirs(folder_path, exist_ok=True)
-    text_file_path = os.path.join(folder_path, text_file_name)
-    csv_file_path = os.path.join(folder_path, csv_file_name)
-
-    # create text file
-    save_to_textfile(text_file_path, text_content)
-    # create csv file
-    df = pd.DataFrame(csv_content)
-    df.to_csv(csv_file_path, sep=';', index=False)
-
 while True:
     BASE_URL = f"https://ph.jobstreet.com/web-developer-jobs?daterange=1&pos=1&salaryrange=70000-&salarytype=monthly&workarrangement=2%2C3&page={page}"
     driver.get(BASE_URL)
@@ -170,6 +156,7 @@ while True:
             "scraped_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             "job_link": raw_link if raw_link else "N/A",
         })
+    # break
     page += 1
 
     if duplicates >= 5:
@@ -183,6 +170,25 @@ driver.quit()
 
 if not job_requirement_list or not jobs:
     sys.exit(1)
+
+def create_job_folder(folder_name: str, file_name: str, text_content: str, csv_content: list):
+    text_file_name = f"{file_name}.txt"
+    csv_file_name = f"{file_name}.csv"
+    folder_path =  os.path.join("datas", folder_name)
+    os.makedirs(folder_path, exist_ok=True)
+    
+    # Force permission (rwxrwxr-x = 775)
+    os.chmod(folder_path, 0o775)
+
+    text_file_path = os.path.join(folder_path, text_file_name)
+    print('text_file_path', text_file_path)
+    csv_file_path = os.path.join(folder_path, csv_file_name)
+
+    # create text file
+    save_to_textfile(text_file_path, text_content)
+    # create csv file
+    df = pd.DataFrame(csv_content)
+    df.to_csv(csv_file_path, sep=';', index=False)
 
 create_job_folder(folder_name=formatted_date, file_name="jobstreet", text_content="\n".join(job_requirement_list), csv_content=jobs)
 print(f"Scraped {len(jobs)} jobs from Jobstreet.")

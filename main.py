@@ -7,6 +7,7 @@ from typing import List
 from ranking import rank_jobs_by_skills
 from migration import migrate
 from utils import logger
+import sys
 
 # run logger script
 logger()
@@ -18,7 +19,14 @@ formatted_date = today.strftime("%Y_%m_%d")
 folder_path = f"datas/{formatted_date}"
 os.makedirs(folder_path, exist_ok=True)
 
+# Force permission (rwxrwxr-x = 775)
+os.chmod(folder_path, 0o775)
+
 jobs_csv_file_path = f"{folder_path}/jobs.csv"
+
+if os.path.exists(jobs_csv_file_path):
+    print('Jobs csv already exist!')
+    sys.exit(1)
 
 csv_files = [f"{folder_path}/jobstreet.csv", f"{folder_path}/linkedin.csv"]
 

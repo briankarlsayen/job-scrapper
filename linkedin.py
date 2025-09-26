@@ -82,21 +82,7 @@ def is_viewed_all_shown(driver) -> bool:
         return True
     return False
 
-def create_job_folder(folder_name: str, file_name: str, text_content: str, csv_content: list):
-    text_file_name = f"{file_name}.txt"
-    csv_file_name = f"{file_name}.csv"
-    folder_path =  os.path.join("datas", folder_name)
-    os.makedirs(folder_path, exist_ok=True)
-    text_file_path = os.path.join(folder_path, text_file_name)
-    csv_file_path = os.path.join(folder_path, csv_file_name)
 
-    # create text file
-    save_to_textfile(text_file_path, text_content)
-    # create csv file
-    df = pd.DataFrame(csv_content)
-    df.to_csv(csv_file_path, sep=';', index=False)
-
-      
 def process_job_scrape(driver):
     retry = False
     BASE_URL = f"https://www.linkedin.com/jobs/search?keywords=Software%20Engineer&location=Philippines&geoId=103121230&f_TPR=r86400&f_WT=3%2C2&position=1"
@@ -283,6 +269,24 @@ driver.quit()
 
 if not job_requirement_list or not jobs:
     sys.exit(1)
+
+def create_job_folder(folder_name: str, file_name: str, text_content: str, csv_content: list):
+    text_file_name = f"{file_name}.txt"
+    csv_file_name = f"{file_name}.csv"
+    folder_path =  os.path.join("datas", folder_name)
+    os.makedirs(folder_path, exist_ok=True)
+
+    # Force permission (rwxrwxr-x = 775)
+    os.chmod(folder_path, 0o775)
+
+    text_file_path = os.path.join(folder_path, text_file_name)
+    csv_file_path = os.path.join(folder_path, csv_file_name)
+
+    # create text file
+    save_to_textfile(text_file_path, text_content)
+    # create csv file
+    df = pd.DataFrame(csv_content)
+    df.to_csv(csv_file_path, sep=';', index=False)
 
 create_job_folder(folder_name=formatted_date, file_name="linkedin", text_content="\n".join(job_requirement_list), csv_content=jobs)
 print(f"Scraped {len(jobs)} jobs from Linkedin.")
