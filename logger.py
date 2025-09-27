@@ -9,5 +9,5 @@ def logger_script():
         with open(log_file, "a") as f:
             f.write(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] {message}\n")
     
-    source = sys.argv[1] if len(sys.argv) > 1 else "unknown"
+    source = sys.argv[1] if len(sys.argv) > 1 else "manual"
     log(f"Script triggered by: {source}")
