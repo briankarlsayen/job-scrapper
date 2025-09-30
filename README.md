@@ -64,3 +64,15 @@ ENCHANCEMENT
 [ ] employment type(full time, contract, part time)
 [ ] salary(if range then max/min)
 [ ] work arrangement(remote, onsite, hybrid)
+
+INSTALL PACKAGES
+
+```
+pip install pandas selenium sqlite3 spacy bs4
+```
+
+INSTALL SPACY MATCHING VERSION
+
+```
+python -m spacy download en_core_web_sm
+```
