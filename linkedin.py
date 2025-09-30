@@ -1,6 +1,7 @@
 
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
 from bs4 import BeautifulSoup
 import pandas as pd
 import time, random
@@ -25,7 +26,9 @@ options.add_argument("--window-size=1920,1080")
 options.add_argument("--disable-blink-features=AutomationControlled")
 options.add_experimental_option("excludeSwitches", ["enable-automation"])
 options.add_experimental_option('useAutomationExtension', False)
-driver = webdriver.Chrome(options=options)
+
+service = Service("/usr/bin/chromedriver") # chromedriver path
+driver = webdriver.Chrome(service=service, options=options)
 driver.set_window_size(1920, 1080)
 
 jobs = []

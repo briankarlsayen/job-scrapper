@@ -47,6 +47,10 @@ TODOS
 --- [x] create cron job
 --- [x] handle missed job
 --- [x] create log when job triggered
+[ ] raspi transfer
+--- [ ] run script, fix dependencies
+--- [ ] run as cronjob
+--- [ ] handle missed jobs
 [ ] data analysis
 
 TIPS:
@@ -58,6 +62,7 @@ BUGS
 [ ] Git not listed when Git/Github
 [x] test linkedin not equal number scraped, test for duplicate titles, lk not logged has duplicate jobs(sites problem issue)
 [x] handle if scraper failed, do not create a csv
+[ ] no db schema once installed, create a schema first before running main.py, create jobs.db > migrate schema > run main.py
 
 ENCHANCEMENT
 [ ] create a test file, for improvement checking
@@ -65,14 +70,35 @@ ENCHANCEMENT
 [ ] salary(if range then max/min)
 [ ] work arrangement(remote, onsite, hybrid)
 
-INSTALL PACKAGES
+## INSTALL PACKAGES
+
+- using requirements.txt
+
+```
+pip install -r requirements.txt
+```
+
+- or manually, with spacy matching
 
 ```
 pip install pandas selenium sqlite3 spacy bs4
 ```
 
-INSTALL SPACY MATCHING VERSION
-
 ```
 python -m spacy download en_core_web_sm
+```
+
+## INSTALL CHROMEDRIVER
+
+- note: update "/usr/bin/chromedriver" to match chromedriver path
+
+```
+sudo apt update
+sudo apt install chromium-browser chromium-chromedriver -y
+```
+
+## RUN SCRIPT
+
+```
+python main.py
 ```
