@@ -6,3 +6,5 @@ __pycache__/
 jobs.db
 dummy/
 logger.log
+old/
+text/
