@@ -147,7 +147,7 @@ def validate_job_title(title: str) -> bool:
             return False
     return True
 
-def logger():
+def logger(log_message=""):
     log_file = Path(__file__).parent / "logger.log"
 
     def log(message):
@@ -155,4 +155,7 @@ def logger():
             f.write(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] {message}\n")
     
     source = sys.argv[1] if len(sys.argv) > 1 else "unknown"
-    log(f"Script triggered by: {source}")
+    if not log_message:
+        log(f"Script triggered by: {source}")
+    else:
+        log(log_message)

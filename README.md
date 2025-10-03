@@ -48,10 +48,13 @@ TODOS
 --- [x] handle missed job
 --- [x] create log when job triggered
 [ ] raspi transfer
---- [ ] run script, fix dependencies
---- [ ] run as cronjob
---- [ ] handle missed jobs
+--- [x] run script, fix dependencies
+--- [x] run as cronjob
+--- [x] handle missed jobs
 [ ] data analysis
+[ ] logs
+--- [ ] create logs on unsuccessful run
+--- [ ] create on start/end run
 
 TIPS:
 
@@ -65,6 +68,7 @@ BUGS
 [ ] no db schema once installed, create a schema first before running main.py, create jobs.db > migrate schema > run main.py
 
 ENCHANCEMENT
+[ ] add log for end scraping
 [ ] create a test file, for improvement checking
 [ ] employment type(full time, contract, part time)
 [ ] salary(if range then max/min)

@@ -3,11 +3,11 @@ from datetime import date
 import pandas as pd
 import subprocess
 import time
-from typing import List 
 from ranking import rank_jobs_by_skills
 from migration import migrate
 from utils import logger
 import sys
+from pathlib import Path
 
 # run logger script
 logger()
@@ -49,9 +49,11 @@ for key, data in scraper.items():
         to_process_exist_list.append(data.get('file'))
 
 # RUN scrapers, retry 3 times once failed
+success_scripts = []
 for script in to_process_exist_list:
     success = False
-    for attempt in range(1, 4):  # try 3 times max
+    error_message = "Retries Failed"
+    for attempt in range(1, 2):  # try 3 times max
         print(f"\n➡️ Running {script}, attempt {attempt}/3")
         try:
             result = subprocess.run(
@@ -63,25 +65,40 @@ for script in to_process_exist_list:
             print(f"✅ Success: {script}")
             print(result.stdout)
             success = True
+            success_scripts.append(script)
             break  # exit retry loop if success
         except subprocess.CalledProcessError as e:
             print(f"❌ Failed attempt {attempt} for {script}")
             print(e.stderr)
+            if e.stderr:
+                error_message = e.stderr 
             time.sleep(1)  # optional delay before retry
     if not success:
         print(f"⚠️ Skipping {script} after 3 failed attempts")
+        logger(log_message=f"Scraping Failed: {script}, {error_message}")
+    
+if not success_scripts:
+    sys.exit(1)
 
+logger(log_message="Scraping Success")
 
 # READ data from created csv's
-dfs = []
-for key, data in scraper.items():
-    item = pd.read_csv(data.get('csv'), delimiter=";")
-    item['source'] = key
-    dfs.append(item)
+def merge_csv_files():
+    files = []
+    folder = Path(folder_path)
+    exclude = {"jobs.csv", "ranked_jobs.csv"}
+    for f in folder.glob("*.csv"):
+        if f.name not in exclude:
+            source = os.path.splitext(os.path.basename(f))[0]
+            item = pd.read_csv(f, delimiter=";")
+            item['source'] = source
+            files.append(item)
+    return files
+
+dfs = merge_csv_files()
 df = pd.concat(dfs, ignore_index=True)
 df.to_csv(f"{folder_path}/jobs.csv",  sep=';', index=False) # CREATE jobs.csv file
 print('jobs: ', len(df))
-
 
 # CREATE ranked_jobs.csv file
 input_skills = ['python', 'Javascript', 'Typescript', 'nosql', 'sql', 'express', 'nodejs', 'reactjs', 'django', 'vuejs', 'mongodb', 'postgresql', 'mysql', 'next.js', 'html', 'css', 'aws', 'azure', 's3', 'zustand', 'redux', 'git', 'gitlab', 'vercel', 'jira','ci/cd', 'rest api', 'docker', 'linux', 'windows', 'mui', 'tailwindcss', 'jest', 'github']
@@ -89,14 +106,17 @@ ranked_skill = rank_jobs_by_skills(df=df, input_skills=input_skills)
 updated_df = pd.DataFrame(ranked_skill)
 updated_df.to_csv(f"{folder_path}/ranked_jobs.csv", sep=';', index=False)
 
-def merge_txt_files(files: List[str], output_file: str):
+# CREATE jobs.txt
+def merge_txt_files(output_file: str):
+    folder = Path(folder_path)
+    exclude = {"jobs.txt"}
+    txt_files = [f for f in folder.glob("*.txt") if f.name not in exclude]
+
     with open(output_file, "w", encoding="utf-8") as out:
-        for file in files:
+        for file in txt_files:
             with open(file, "r", encoding="utf-8") as f:
                 out.write(f.read())
-
-files_to_merge = [f"{folder_path}/jobstreet.txt", f"{folder_path}/linkedin.txt"]
-merge_txt_files(files_to_merge, f"{folder_path}/jobs.txt")
+merge_txt_files(output_file=f"{folder_path}/jobs.txt")
 
 # INSERT todays job data to db
 try: 
@@ -105,8 +125,14 @@ except:
     print('Unable to save to database')
 
 # DELETE files
+def safe_remove(file_path: str | None):
+    """Remove file if it exists and path is valid."""
+    if file_path and os.path.exists(file_path):
+        os.remove(file_path)
+
 if os.path.exists(jobs_csv_file_path):
-    os.remove(scraper['jobstreet']['csv'])
-    os.remove(scraper['jobstreet']['txt'])
-    os.remove(scraper['linkedin']['csv'])
-    os.remove(scraper['linkedin']['txt'])
+    safe_remove(scraper['jobstreet']['csv'])
+    safe_remove(scraper['jobstreet']['txt'])
+    safe_remove(scraper['linkedin']['csv'])
+    safe_remove(scraper['linkedin']['txt'])
+    print('remove na')
