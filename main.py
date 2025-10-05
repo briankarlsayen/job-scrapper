@@ -53,7 +53,7 @@ success_scripts = []
 for script in to_process_exist_list:
     success = False
     error_message = "Retries Failed"
-    for attempt in range(1, 2):  # try 3 times max
+    for attempt in range(1, 4):  # try 3 times max
         print(f"\n➡️ Running {script}, attempt {attempt}/3")
         try:
             result = subprocess.run(

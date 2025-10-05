@@ -49,12 +49,12 @@ TODOS
 --- [x] create log when job triggered
 [ ] raspi transfer
 --- [x] run script, fix dependencies
---- [x] run as cronjob
---- [x] handle missed jobs
+--- [ ] run as cronjob
+--- [ ] handle missed jobs
 [ ] data analysis
-[ ] logs
---- [ ] create logs on unsuccessful run
---- [ ] create on start/end run
+[x] logs
+--- [x] create logs on unsuccessful run
+--- [x] create on start/end run
 
 TIPS:
 
