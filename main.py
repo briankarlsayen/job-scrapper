@@ -69,9 +69,9 @@ for script in to_process_exist_list:
             break  # exit retry loop if success
         except subprocess.CalledProcessError as e:
             print(f"❌ Failed attempt {attempt} for {script}")
-            print(e.stderr)
+            print('error :', e.stderr.strip())
             if e.stderr:
-                error_message = e.stderr 
+                error_message = e.stderr.strip()
             time.sleep(1)  # optional delay before retry
     if not success:
         print(f"⚠️ Skipping {script} after 3 failed attempts")
@@ -135,4 +135,3 @@ if os.path.exists(jobs_csv_file_path):
     safe_remove(scraper['jobstreet']['txt'])
     safe_remove(scraper['linkedin']['csv'])
     safe_remove(scraper['linkedin']['txt'])
-    print('remove na')

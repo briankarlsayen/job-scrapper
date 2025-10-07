@@ -11,10 +11,11 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from utils import save_to_textfile, skill_extraction, validate_job_title
-from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import NoSuchElementException, TimeoutException, WebDriverException
 from constant import BULLET_CHARS, SEPARATOR
 from typing import List
 import sys
+
 
 options = Options()
 # options.add_argument("--headless")
@@ -76,7 +77,27 @@ def safe_find_element(parent, by: By, value: str):
 
 while True:
     BASE_URL = f"https://ph.jobstreet.com/web-developer-jobs?daterange=1&pos=1&salaryrange=70000-&salarytype=monthly&workarrangement=2%2C3&page={page}"
-    driver.get(BASE_URL)
+
+    try:
+        driver.get(BASE_URL)
+    except TimeoutException as e:
+        message = str(e).split("\n")[0]
+        print(f"TimeoutException: {message}", file=sys.stderr)
+        sys.exit(2)
+        break
+
+    except WebDriverException as e:
+        message = str(e).split("\n")[0]
+        print(f"WebDriverException: {message}", file=sys.stderr)
+        sys.exit(3)
+        break
+
+    except Exception as e:
+        message = str(e).split("\n")[0]
+        print(f"UnexpectedError: {message}", file=sys.stderr)
+        sys.exit(4)
+        break
+
     time.sleep(3) 
     wait = WebDriverWait(driver, 10)
 

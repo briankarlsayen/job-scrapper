@@ -10,6 +10,7 @@ import os
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
+from selenium.common.exceptions import NoSuchElementException, TimeoutException, WebDriverException
 from utils import save_to_textfile, skill_extraction, validate_job_title
 from selenium.common.exceptions import NoSuchElementException
 from constant import BULLET_CHARS, SEPARATOR
@@ -86,11 +87,33 @@ def is_viewed_all_shown(driver) -> bool:
     return False
 
 
-def process_job_scrape(driver):
+def process_job_scrape(driver, reload=False):
     retry = False
     BASE_URL = f"https://www.linkedin.com/jobs/search?keywords=Software%20Engineer&location=Philippines&geoId=103121230&f_TPR=r86400&f_WT=3%2C2&position=1"
-    driver.get(BASE_URL)
-    wait = WebDriverWait(driver, 30)
+
+    try:
+        driver.get(BASE_URL)
+        wait = WebDriverWait(driver, 30)
+    except TimeoutException as e:
+        if reload == False:
+            driver.refresh()
+            process_job_scrape(driver, reload=True)
+        message = str(e).split("\n")[0]
+        print(f"TimeoutException: {message}", file=sys.stderr)
+        return
+
+    except WebDriverException as e:
+        message = str(e).split("\n")[0]
+        print(f"WebDriverException: {message}", file=sys.stderr)
+        return
+
+    except Exception as e:
+        message = str(e).split("\n")[0]
+        print(f"UnexpectedError: {message}", file=sys.stderr)
+        return
+
+    # driver.get(BASE_URL)
+    # wait = WebDriverWait(driver, 30)
     duplicates = 0 
 
     # close login modal
@@ -229,8 +252,9 @@ def process_job_scrape(driver):
             retry = True
             break
 
-        soup = BeautifulSoup(driver.page_source, "html.parser")
+        soup = BeautifulSoup(driver.page_source, "html.parser")        
         job_description = soup.select_one("div.show-more-less-html__markup")
+        
         if not job_description:
             continue
 
@@ -262,11 +286,16 @@ def process_job_scrape(driver):
     return retry
     
 retry = True
+is_error = False
 while retry:
     try:
-        retry = process_job_scrape(driver)
+        retry = process_job_scrape(driver, reload=False)
     except Exception as e:
-        print('Error :', e)
+        is_error = True
+        
+if is_error:
+    driver.quit()
+    sys.exit(2)
 
 driver.quit()
 

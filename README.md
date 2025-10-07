@@ -66,6 +66,7 @@ BUGS
 [x] test linkedin not equal number scraped, test for duplicate titles, lk not logged has duplicate jobs(sites problem issue)
 [x] handle if scraper failed, do not create a csv
 [ ] no db schema once installed, create a schema first before running main.py, create jobs.db > migrate schema > run main.py
+[x] error on fetching url, handle error and create logs
 
 ENCHANCEMENT
 [ ] add log for end scraping
