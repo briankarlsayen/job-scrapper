@@ -96,7 +96,7 @@ def process_job_scrape(driver, reload=False):
         wait = WebDriverWait(driver, 30)
     except TimeoutException as e:
         if reload == False:
-            driver.refresh()
+            # driver.refresh()
             process_job_scrape(driver, reload=True)
         message = str(e).split("\n")[0]
         print(f"TimeoutException: {message}", file=sys.stderr)
@@ -148,8 +148,8 @@ def process_job_scrape(driver, reload=False):
             return True
 
     time.sleep(5)
-    success = close_modal(driver)
-    if not success:
+    is_modal_closed = close_modal(driver)
+    if not is_modal_closed:
         return
     time.sleep(1)
 
