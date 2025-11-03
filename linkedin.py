@@ -16,6 +16,14 @@ from selenium.common.exceptions import NoSuchElementException
 from constant import BULLET_CHARS, SEPARATOR
 from selenium.webdriver.chrome.service import Service
 import sys
+from rich.progress import (
+    Progress,
+    SpinnerColumn,
+    BarColumn,
+    TextColumn,
+    TimeElapsedColumn,
+    TimeRemainingColumn,
+)
 
 options = Options()
 options.add_argument("--headless=new")
@@ -33,6 +41,7 @@ driver = webdriver.Chrome(service=service, options=options)
 driver.set_window_size(1920, 1080)
 
 jobs = []
+scraped_job_len = 0
 seen_links = set()
 separator = SEPARATOR
 
@@ -86,10 +95,14 @@ def is_viewed_all_shown(driver) -> bool:
         return True
     return False
 
-
+# TODO if redirected then check jobs len if not empty then break
 def process_job_scrape(driver, reload=False):
     retry = False
     BASE_URL = f"https://www.linkedin.com/jobs/search?keywords=Software%20Engineer&location=Philippines&geoId=103121230&f_TPR=r86400&f_WT=3%2C2&position=1"
+
+    if len(jobs) > 0:
+        print('Already processed some job links')
+        return False
 
     try:
         driver.get(BASE_URL)
@@ -118,7 +131,7 @@ def process_job_scrape(driver, reload=False):
 
     # close login modal
     def close_modal(driver) -> bool:
-        retry = 3
+        retry_count = 10
         retry_failed = False
         while True:
             try:
@@ -133,15 +146,15 @@ def process_job_scrape(driver, reload=False):
                 close_button = overlay.find_element(By.XPATH, "//button[contains(@class, 'modal__dismiss')]")
                 driver.execute_script("arguments[0].click();", close_button)
 
-                if retry <=0:
+                if retry_count <=0:
                     retry_failed = True
                     break
-                retry -= 1
+                retry_count -= 1
                 time.sleep(3)
             except Exception as e:
                 print("No modal or not clickable:", e)
         if retry_failed:
-            print('Retries Failed')
+            print('Retries failed, unable to close modal')
             return False
         else:
             print('Successfully closed modal')
@@ -215,89 +228,110 @@ def process_job_scrape(driver, reload=False):
 
     print('Unfiltered jobs: ', len(job_cards))
 
-    for job in job_cards:
-        time.sleep(1)
-        title_tag = safe_find_element(job, By.CSS_SELECTOR, "h3.base-search-card__title")
-        title_text = title_tag.text.strip() if title_tag else None
-        # if not validate_job_title(title_text):
-        #     print('Not valid job :', title_text)
-        #     continue
 
-        link_tag = safe_find_element(job, By.CSS_SELECTOR, "a.base-card__full-link")
-        job_link = link_tag.get_attribute("href") if link_tag else None
-        raw_link = job_link.split("?position")[0] if job_link else None
-        company_tag = safe_find_element(job, By.CSS_SELECTOR, "h4.base-search-card__subtitle")
-        company_text = company_tag.text.strip() if company_tag else None
-        location_tag = safe_find_element(job, By.CSS_SELECTOR, "span.job-search-card__location")
-        location_text = location_tag.text.strip() if location_tag else None
-        date_tag = safe_find_element(job, By.CSS_SELECTOR, "time.job-search-card__listdate--new")
-        date_text = date_tag.text.strip() if date_tag else None
+    with Progress(
+        SpinnerColumn(),
+        TextColumn("[cyan]{task.description}"),
+        BarColumn(),
+        TextColumn("[progress.percentage]{task.percentage:>3.0f}%"),
+        TimeElapsedColumn(),
+        TimeRemainingColumn(),
+    ) as progress:
+        task = progress.add_task("Scraping...", total=len(job_cards))
 
-        if raw_link in seen_links:
-            duplicates +=1
-            continue  # Skip duplicate
-        seen_links.add(raw_link)
+        for job in job_cards:
+            time.sleep(1)
+            title_tag = safe_find_element(job, By.CSS_SELECTOR, "h3.base-search-card__title")
+            title_text = title_tag.text.strip() if title_tag else None
+            # if not validate_job_title(title_text):
+            #     print('Not valid job :', title_text)
+            #     continue
 
-        job.click()
-        items += 1 
-        time.sleep(8)
+            link_tag = safe_find_element(job, By.CSS_SELECTOR, "a.base-card__full-link")
+            job_link = link_tag.get_attribute("href") if link_tag else None
+            raw_link = job_link.split("?position")[0] if job_link else None
+            company_tag = safe_find_element(job, By.CSS_SELECTOR, "h4.base-search-card__subtitle")
+            company_text = company_tag.text.strip() if company_tag else None
+            location_tag = safe_find_element(job, By.CSS_SELECTOR, "span.job-search-card__location")
+            location_text = location_tag.text.strip() if location_tag else None
+            date_tag = safe_find_element(job, By.CSS_SELECTOR, "time.job-search-card__listdate--new")
+            date_text = date_tag.text.strip() if date_tag else None
+
+            if raw_link in seen_links:
+                duplicates +=1
+                continue  # Skip duplicate
+            seen_links.add(raw_link)
+
+            job.click()
+            items += 1 
+            time.sleep(8)
+            
+            # if items > 5: # TODO test
+            #     break
+
+            current_url = driver.current_url
+            # TODO if it already scraped some items, retry = False
+            # TODO show log on error that it has redirected
+            if "/jobs/view/" in current_url:
+                driver.back()  # go back to previous results page
+                time.sleep(2)  # wait to reload results page
+                
+                retry = False if len(jobs) > 0 else True
+                print('Redirected to another link')
+                print('Redirection link details', title_text, '-', raw_link)
+                break
+
+            soup = BeautifulSoup(driver.page_source, "html.parser")        
+            job_description = soup.select_one("div.show-more-less-html__markup")
+            
+            if not job_description:
+                continue
+
+            requirement_list = extract_section(job_description)
+            extraction_list = [title_text] + requirement_list
+            required_skills = skill_extraction("\n".join(extraction_list))
+
+            job_requirement_list.extend(["Title: " + title_text if title_text else "N/A", 
+                                        "Company: " + company_text if company_text else "N/A", 
+                                        "Link: " + raw_link if raw_link else "N/A", 
+                                        "Requirements:"])
+            job_requirement_list.extend(requirement_list)
+            # <---------- SKILLS section
+            job_requirement_list.extend(['Skills:'])
+            if len(required_skills):
+                job_requirement_list.extend([",".join(required_skills)]) 
+            # -------------------------->
+            job_requirement_list.append(separator)
+
+            jobs.append({
+                "title": title_text if title_text else "N/A",
+                "company": company_text if company_text else "N/A",
+                "location": location_text if location_text else "N/A",
+                "required_skills": ",".join(required_skills) if len(required_skills) else "N/A",
+                "date_posted": date_text if date_text else "N/A",
+                "scraped_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                "job_link": raw_link if raw_link else "N/A",
+            })
+
+            progress.advance(task)
         
-        # if items > 5: # TODO test
-        #     break
-
-        current_url = driver.current_url
-        if "/jobs/view/" in current_url:
-            driver.back()  # go back to previous results page
-            time.sleep(2)  # wait to reload results page
-            retry = True
-            break
-
-        soup = BeautifulSoup(driver.page_source, "html.parser")        
-        job_description = soup.select_one("div.show-more-less-html__markup")
-        
-        if not job_description:
-            continue
-
-        requirement_list = extract_section(job_description)
-        extraction_list = [title_text] + requirement_list
-        required_skills = skill_extraction("\n".join(extraction_list))
-
-        job_requirement_list.extend(["Title: " + title_text if title_text else "N/A", 
-                                     "Company: " + company_text if company_text else "N/A", 
-                                     "Link: " + raw_link if raw_link else "N/A", 
-                                     "Requirements:"])
-        job_requirement_list.extend(requirement_list)
-        # <---------- SKILLS section
-        job_requirement_list.extend(['Skills:'])
-        if len(required_skills):
-            job_requirement_list.extend([",".join(required_skills)]) 
-        # -------------------------->
-        job_requirement_list.append(separator)
-
-        jobs.append({
-            "title": title_text if title_text else "N/A",
-            "company": company_text if company_text else "N/A",
-            "location": location_text if location_text else "N/A",
-            "required_skills": ",".join(required_skills) if len(required_skills) else "N/A",
-            "date_posted": date_text if date_text else "N/A",
-            "scraped_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            "job_link": raw_link if raw_link else "N/A",
-        })
-    return retry
+    return retry, len(job_cards)
     
 retry = True
 is_error = False
 while retry:
     try:
-        retry = process_job_scrape(driver, reload=False)
+        retry, scraped_job_len = process_job_scrape(driver, reload=False)
     except Exception as e:
         is_error = True
-        
-if is_error:
-    driver.quit()
-    sys.exit(2)
+        print('Error in scraping: ', e)
 
-driver.quit()
+if len(jobs) == 0:
+    if is_error:
+        driver.quit()
+        sys.exit(2)
+
+    driver.quit()
 
 if not job_requirement_list or not jobs:
     sys.exit(1)
@@ -322,5 +356,6 @@ def create_job_folder(folder_name: str, file_name: str, text_content: str, csv_c
 
 create_job_folder(folder_name=formatted_date, file_name="linkedin", text_content="\n".join(job_requirement_list), csv_content=jobs)
 print(f"Scraped {len(jobs)} jobs from Linkedin.")
+print(f"Processed {len(jobs)} out of {scraped_job_len} jobs")
 
 

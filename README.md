@@ -67,8 +67,12 @@ BUGS
 [x] handle if scraper failed, do not create a csv
 [ ] no db schema once installed, create a schema first before running main.py, create jobs.db > migrate schema > run main.py
 [x] error on fetching url, handle error and create logs
+[ ] error on linkedin, looping on fetching items
+--- [ ] add progress meter
+--- [ ] find out why it is looping, if found valid/difficult, just stop the process and save the scrapped items
 
 ENCHANCEMENT
+[ ] logging, add a global logs to show everyday run on all script
 [ ] add log for end scraping
 [ ] create a test file, for improvement checking
 [ ] employment type(full time, contract, part time)
