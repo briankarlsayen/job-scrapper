@@ -5,7 +5,9 @@ import json
 import re
 from pathlib import Path
 import sys
-from datetime import datetime
+from datetime import datetime, date
+import os
+import logging
 
 def add_space_around_slash(text: str) -> str:
     pascal_case_space = re.sub(r'(?<=[a-z])(?=[A-Z])', ' ', text) if re.match(r'^[a-z]', text) else text
@@ -147,15 +149,41 @@ def validate_job_title(title: str) -> bool:
             return False
     return True
 
+def log(message, file):
+    with open(file, "a") as f:
+        f.write(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] {message}\n")
+
 def logger(log_message=""):
     log_file = Path(__file__).parent / "logger.log"
-
-    def log(message):
-        with open(log_file, "a") as f:
-            f.write(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] {message}\n")
     
     source = sys.argv[1] if len(sys.argv) > 1 else "unknown"
     if not log_message:
-        log(f"Script triggered by: {source}")
+        log(f"Script triggered by: {source}", log_file)
     else:
-        log(log_message)
+        log(log_message, log_file)
+
+
+def linkedin_log(message):
+    today = date.today()
+    formatted_date = today.strftime("%Y_%m_%d")
+    folder_path = f"logs/linkedin"
+    os.makedirs(folder_path, exist_ok=True)
+
+    text_file_path = os.path.join(folder_path, f"{formatted_date}.log")
+
+    logging.basicConfig(
+        filename=text_file_path,
+        level=logging.INFO,
+        format="%(asctime)s - %(message)s",
+    )
+    logging.info(message)
+
+def format_time(seconds: float) -> str:
+    if seconds < 60:
+        return f"{seconds:.1f}s"
+    elif seconds < 3600:
+        minutes = seconds / 60
+        return f"{minutes:.1f}min"
+    else:
+        hours = seconds / 3600
+        return f"{hours:.1f}hr"

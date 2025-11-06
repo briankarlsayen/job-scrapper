@@ -10,7 +10,7 @@ import os
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
-from selenium.common.exceptions import NoSuchElementException, TimeoutException, WebDriverException
+from selenium.common.exceptions import NoSuchElementException, TimeoutException, WebDriverException, ElementClickInterceptedException, ElementNotInteractableException, NoSuchElementException
 from utils import save_to_textfile, skill_extraction, validate_job_title
 from selenium.common.exceptions import NoSuchElementException
 from constant import BULLET_CHARS, SEPARATOR
@@ -24,7 +24,9 @@ from rich.progress import (
     TimeElapsedColumn,
     TimeRemainingColumn,
 )
+from utils import linkedin_log, format_time
 
+linkedin_log('Start')
 options = Options()
 options.add_argument("--headless=new")
 options.add_argument("--disable-gpu")
@@ -95,8 +97,24 @@ def is_viewed_all_shown(driver) -> bool:
         return True
     return False
 
-# TODO if redirected then check jobs len if not empty then break
+def safe_click(element, retries=3, delay=2):
+    for attempt in range(retries):
+        try:
+            element.click()
+            return True  # Success
+        except (ElementClickInterceptedException, ElementNotInteractableException):
+            print(f"[WARN] Click attempt {attempt + 1} failed — element not clickable yet. Retrying...")
+            time.sleep(delay)
+        except NoSuchElementException:
+            print("[ERROR] Element not found.")
+            return False
+    linkedin_log("[ERROR] Failed to click element after retries.")
+    print("[ERROR] Failed to click element after retries.")
+    return False
+
 def process_job_scrape(driver, reload=False):
+    default_err = False, 0
+    linkedin_log('Processing job scrape')
     retry = False
     BASE_URL = f"https://www.linkedin.com/jobs/search?keywords=Software%20Engineer&location=Philippines&geoId=103121230&f_TPR=r86400&f_WT=3%2C2&position=1"
 
@@ -152,18 +170,21 @@ def process_job_scrape(driver, reload=False):
                 retry_count -= 1
                 time.sleep(3)
             except Exception as e:
+                linkedin_log('No modal or not clickable')
                 print("No modal or not clickable:", e)
         if retry_failed:
+            linkedin_log('Retries failed, unable to close modal')
             print('Retries failed, unable to close modal')
             return False
         else:
+            linkedin_log('Successfully closed modal')
             print('Successfully closed modal')
             return True
 
     time.sleep(5)
     is_modal_closed = close_modal(driver)
     if not is_modal_closed:
-        return
+        return default_err
     time.sleep(1)
 
     # handle scroll lazy loading
@@ -211,8 +232,10 @@ def process_job_scrape(driver, reload=False):
                 break
         
         return success
+    linkedin_log('Loading all jobs')
     success = load_all_jobs() 
     if not success:
+        linkedin_log('Processing partial jobs')
         print('Processing partial jobs')
 
     job_cards = []
@@ -220,14 +243,14 @@ def process_job_scrape(driver, reload=False):
         job_cards = wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, "ul.jobs-search__results-list li")))
     except:
         print('No jobs scraped')
-        return
+        return default_err
+    
     if not job_cards:
-        return
+        return default_err
 
     items = 0
 
     print('Unfiltered jobs: ', len(job_cards))
-
 
     with Progress(
         SpinnerColumn(),
@@ -238,6 +261,9 @@ def process_job_scrape(driver, reload=False):
         TimeRemainingColumn(),
     ) as progress:
         task = progress.add_task("Scraping...", total=len(job_cards))
+
+        start_time = time.time()
+        eta_logged = False
 
         for job in job_cards:
             time.sleep(1)
@@ -262,7 +288,9 @@ def process_job_scrape(driver, reload=False):
                 continue  # Skip duplicate
             seen_links.add(raw_link)
 
-            job.click()
+            is_click_success = safe_click(job)
+            if not is_click_success:
+                continue
             items += 1 
             time.sleep(8)
             
@@ -270,8 +298,6 @@ def process_job_scrape(driver, reload=False):
             #     break
 
             current_url = driver.current_url
-            # TODO if it already scraped some items, retry = False
-            # TODO show log on error that it has redirected
             if "/jobs/view/" in current_url:
                 driver.back()  # go back to previous results page
                 time.sleep(2)  # wait to reload results page
@@ -279,6 +305,9 @@ def process_job_scrape(driver, reload=False):
                 retry = False if len(jobs) > 0 else True
                 print('Redirected to another link')
                 print('Redirection link details', title_text, '-', raw_link)
+
+                linkedin_log('Redirected to another link')
+                linkedin_log(f'Redirection link details {title_text} - {raw_link}')
                 break
 
             soup = BeautifulSoup(driver.page_source, "html.parser")        
@@ -314,6 +343,18 @@ def process_job_scrape(driver, reload=False):
             })
 
             progress.advance(task)
+            if not eta_logged and progress.tasks[0].completed >= 1:
+                total_items = len(job_cards)
+                elapsed_first = time.time() - start_time
+                estimated_total_time = elapsed_first * len(job_cards)
+
+                linkedin_log(
+                    f"Estimated total time: {format_time(estimated_total_time)} | "
+                    f"Total tasks: {total_items} | "
+                    f"Estimated time per task: {format_time(elapsed_first)}"
+                )
+                eta_logged = True
+
         
     return retry, len(job_cards)
     
@@ -324,16 +365,20 @@ while retry:
         retry, scraped_job_len = process_job_scrape(driver, reload=False)
     except Exception as e:
         is_error = True
+        retry = False
+        linkedin_log(f'Error in scraping: {e}')
         print('Error in scraping: ', e)
 
 if len(jobs) == 0:
     if is_error:
         driver.quit()
         sys.exit(2)
+        linkedin_log('Processing stop')
 
     driver.quit()
 
 if not job_requirement_list or not jobs:
+    linkedin_log('Processing stop')
     sys.exit(1)
 
 def create_job_folder(folder_name: str, file_name: str, text_content: str, csv_content: list):
@@ -357,5 +402,5 @@ def create_job_folder(folder_name: str, file_name: str, text_content: str, csv_c
 create_job_folder(folder_name=formatted_date, file_name="linkedin", text_content="\n".join(job_requirement_list), csv_content=jobs)
 print(f"Scraped {len(jobs)} jobs from Linkedin.")
 print(f"Processed {len(jobs)} out of {scraped_job_len} jobs")
-
+linkedin_log(f"Processed {len(jobs)} out of {scraped_job_len} jobs")
 

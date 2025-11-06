@@ -9,3 +9,4 @@ logger.log
 old/
 text/
 last_run.txt
+logs/

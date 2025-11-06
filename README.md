@@ -35,10 +35,10 @@ TODOS
 --- [x] fix unreliable modal clicker, if not clicked stop operation
 --- [x] apply to main file
 [x] get all ul,li, and strings with bullet points for requirements
-[ ] automatic running: by my pc or raspi
+[x] automatic running: by my pc or raspi
 --- [x] run headless
 --- [x] test run on 2pm next day
---- [ ] if cron time today has passed, run in at once (check anacron)
+--- [x] add reboot checker on cron to handle late startup
 [x] save to data database
 --- [x] setup db schema
 --- [x] import csv data to db
@@ -67,9 +67,10 @@ BUGS
 [x] handle if scraper failed, do not create a csv
 [ ] no db schema once installed, create a schema first before running main.py, create jobs.db > migrate schema > run main.py
 [x] error on fetching url, handle error and create logs
-[ ] error on linkedin, looping on fetching items
---- [ ] add progress meter
---- [ ] find out why it is looping, if found valid/difficult, just stop the process and save the scrapped items
+[x] error on linkedin, looping on fetching items
+--- [x] add progress meter
+--- [x] find out why it is looping, if found valid/difficult, just stop the process and save the scrapped items
+--- [x] Error in scraping: cannot unpack non-iterable NoneType object --- trace this error
 
 ENCHANCEMENT
 [ ] logging, add a global logs to show everyday run on all script
