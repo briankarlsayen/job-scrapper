@@ -103,13 +103,12 @@ def safe_click(element, retries=3, delay=2):
             element.click()
             return True  # Success
         except (ElementClickInterceptedException, ElementNotInteractableException):
-            print(f"[WARN] Click attempt {attempt + 1} failed — element not clickable yet. Retrying...")
+            # Element not clickable, for retry
             time.sleep(delay)
         except NoSuchElementException:
-            print("[ERROR] Element not found.")
+            # Element not found
             return False
     linkedin_log("[ERROR] Failed to click element after retries.")
-    print("[ERROR] Failed to click element after retries.")
     return False
 
 def process_job_scrape(driver, reload=False):
@@ -119,7 +118,6 @@ def process_job_scrape(driver, reload=False):
     BASE_URL = f"https://www.linkedin.com/jobs/search?keywords=Software%20Engineer&location=Philippines&geoId=103121230&f_TPR=r86400&f_WT=3%2C2&position=1"
 
     if len(jobs) > 0:
-        print('Already processed some job links')
         return False
 
     try:
@@ -143,8 +141,6 @@ def process_job_scrape(driver, reload=False):
         print(f"UnexpectedError: {message}", file=sys.stderr)
         return
 
-    # driver.get(BASE_URL)
-    # wait = WebDriverWait(driver, 30)
     duplicates = 0 
 
     # close login modal
@@ -178,7 +174,6 @@ def process_job_scrape(driver, reload=False):
             return False
         else:
             linkedin_log('Successfully closed modal')
-            print('Successfully closed modal')
             return True
 
     time.sleep(5)
@@ -236,21 +231,17 @@ def process_job_scrape(driver, reload=False):
     success = load_all_jobs() 
     if not success:
         linkedin_log('Processing partial jobs')
-        print('Processing partial jobs')
 
     job_cards = []
     try:
         job_cards = wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, "ul.jobs-search__results-list li")))
     except:
-        print('No jobs scraped')
         return default_err
     
     if not job_cards:
         return default_err
 
     items = 0
-
-    print('Unfiltered jobs: ', len(job_cards))
 
     with Progress(
         SpinnerColumn(),
@@ -269,10 +260,6 @@ def process_job_scrape(driver, reload=False):
             time.sleep(1)
             title_tag = safe_find_element(job, By.CSS_SELECTOR, "h3.base-search-card__title")
             title_text = title_tag.text.strip() if title_tag else None
-            # if not validate_job_title(title_text):
-            #     print('Not valid job :', title_text)
-            #     continue
-
             link_tag = safe_find_element(job, By.CSS_SELECTOR, "a.base-card__full-link")
             job_link = link_tag.get_attribute("href") if link_tag else None
             raw_link = job_link.split("?position")[0] if job_link else None
@@ -285,16 +272,20 @@ def process_job_scrape(driver, reload=False):
 
             if raw_link in seen_links:
                 duplicates +=1
+                progress.advance(task)
                 continue  # Skip duplicate
             seen_links.add(raw_link)
 
             is_click_success = safe_click(job)
             if not is_click_success:
+                linkedin_log(f'Unable to click link, Title: {title_tag}, Link: {raw_link}')
+                progress.advance(task)
                 continue
             items += 1 
             time.sleep(8)
             
-            # if items > 5: # TODO test
+            #  <---- FOR TESTING
+            # if items > 5: 
             #     break
 
             current_url = driver.current_url
@@ -303,8 +294,6 @@ def process_job_scrape(driver, reload=False):
                 time.sleep(2)  # wait to reload results page
                 
                 retry = False if len(jobs) > 0 else True
-                print('Redirected to another link')
-                print('Redirection link details', title_text, '-', raw_link)
 
                 linkedin_log('Redirected to another link')
                 linkedin_log(f'Redirection link details {title_text} - {raw_link}')
@@ -314,6 +303,7 @@ def process_job_scrape(driver, reload=False):
             job_description = soup.select_one("div.show-more-less-html__markup")
             
             if not job_description:
+                progress.advance(task)
                 continue
 
             requirement_list = extract_section(job_description)
@@ -400,7 +390,6 @@ def create_job_folder(folder_name: str, file_name: str, text_content: str, csv_c
     df.to_csv(csv_file_path, sep=';', index=False)
 
 create_job_folder(folder_name=formatted_date, file_name="linkedin", text_content="\n".join(job_requirement_list), csv_content=jobs)
-print(f"Scraped {len(jobs)} jobs from Linkedin.")
-print(f"Processed {len(jobs)} out of {scraped_job_len} jobs")
+# TODO count duplicate job, unclickable job link
 linkedin_log(f"Processed {len(jobs)} out of {scraped_job_len} jobs")
 

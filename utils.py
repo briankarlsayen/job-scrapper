@@ -163,7 +163,7 @@ def logger(log_message=""):
         log(log_message, log_file)
 
 
-def linkedin_log(message):
+def linkedin_log(message, print_log):
     today = date.today()
     formatted_date = today.strftime("%Y_%m_%d")
     folder_path = f"logs/linkedin"
@@ -177,6 +177,9 @@ def linkedin_log(message):
         format="%(asctime)s - %(message)s",
     )
     logging.info(message)
+    
+    if print_log:
+        print(message)
 
 def format_time(seconds: float) -> str:
     if seconds < 60:
