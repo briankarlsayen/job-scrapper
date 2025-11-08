@@ -2,19 +2,21 @@
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
+from selenium.common.exceptions import NoSuchElementException, TimeoutException, WebDriverException, ElementClickInterceptedException, ElementNotInteractableException, NoSuchElementException
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.common.action_chains import ActionChains
+from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.chrome.service import Service
 from bs4 import BeautifulSoup
 import pandas as pd
 import time, random
 from datetime import datetime, date
 import os
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.by import By
-from selenium.common.exceptions import NoSuchElementException, TimeoutException, WebDriverException, ElementClickInterceptedException, ElementNotInteractableException, NoSuchElementException
-from utils import save_to_textfile, skill_extraction, validate_job_title
-from selenium.common.exceptions import NoSuchElementException
 from constant import BULLET_CHARS, SEPARATOR
-from selenium.webdriver.chrome.service import Service
+from utils.utils import save_to_textfile, skill_extraction, save_screenshot
 import sys
 from rich.progress import (
     Progress,
@@ -24,7 +26,7 @@ from rich.progress import (
     TimeElapsedColumn,
     TimeRemainingColumn,
 )
-from utils import linkedin_log, format_time
+from utils.utils import linkedin_log, format_time
 
 linkedin_log('Start')
 options = Options()
@@ -145,6 +147,16 @@ def process_job_scrape(driver, reload=False):
 
     # close login modal
     def close_modal(driver) -> bool:
+        # simulate press ESC key
+        ActionChains(driver).send_keys(Keys.ESCAPE).perform()
+
+        # click outside --- untested
+        # try:
+        #     # Try clicking outside first
+        #     driver.execute_script("document.elementFromPoint(0, 0).click();")
+        # except Exception:
+        #     pass
+
         retry_count = 10
         retry_failed = False
         while True:
@@ -241,7 +253,9 @@ def process_job_scrape(driver, reload=False):
     if not job_cards:
         return default_err
 
-    items = 0
+    items = 0 
+
+    failed_job_click = 0
 
     with Progress(
         SpinnerColumn(),
@@ -278,8 +292,20 @@ def process_job_scrape(driver, reload=False):
 
             is_click_success = safe_click(job)
             if not is_click_success:
-                linkedin_log(f'Unable to click link, Title: {title_tag}, Link: {raw_link}')
+                if failed_job_click >= 3:
+                    retry = False if len(jobs) > 0 else True
+                    break
+                failed_job_click += 1
+
+                linkedin_log(f'Unable to click link, Title: {title_text}, Link: {raw_link}')
+                save_screenshot(driver)
                 progress.advance(task)
+                is_modal_closed = close_modal(driver)
+                if not is_modal_closed:
+                    linkedin_log('A wild modal appeared! You have been defeated by a wild modal...')
+                else:
+                    linkedin_log('Successfully defeated a wild modal!')
+
                 continue
             items += 1 
             time.sleep(8)
@@ -305,7 +331,7 @@ def process_job_scrape(driver, reload=False):
             if not job_description:
                 progress.advance(task)
                 continue
-
+            
             requirement_list = extract_section(job_description)
             extraction_list = [title_text] + requirement_list
             required_skills = skill_extraction("\n".join(extraction_list))

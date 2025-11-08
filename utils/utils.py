@@ -163,7 +163,7 @@ def logger(log_message=""):
         log(log_message, log_file)
 
 
-def linkedin_log(message, print_log):
+def linkedin_log(message, print_log=False):
     today = date.today()
     formatted_date = today.strftime("%Y_%m_%d")
     folder_path = f"logs/linkedin"
@@ -190,3 +190,10 @@ def format_time(seconds: float) -> str:
     else:
         hours = seconds / 3600
         return f"{hours:.1f}hr"
+
+def save_screenshot(driver, folder="screenshots"):
+    Path(folder).mkdir(parents=True, exist_ok=True)  # ✅ Ensure folder exists
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    filename = f"{folder}/{timestamp}.png"
+    driver.save_screenshot(filename)
+    print(f"[DEBUG] Screenshot saved as: {filename}")

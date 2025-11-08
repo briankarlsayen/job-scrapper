@@ -10,7 +10,7 @@ import os
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
-from utils import save_to_textfile, skill_extraction, validate_job_title
+from utils.utils import save_to_textfile, skill_extraction, validate_job_title
 from selenium.common.exceptions import NoSuchElementException, TimeoutException, WebDriverException
 from constant import BULLET_CHARS, SEPARATOR
 from typing import List

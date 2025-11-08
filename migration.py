@@ -2,9 +2,9 @@ import sqlite3
 import pandas as pd
 import os 
 
-def create_schema():
+def create_schema(db_path: str):
     # Connect to SQLite DB (creates jobs.db if not exists)
-    conn = sqlite3.connect("jobs.db")
+    conn = sqlite3.connect(db_path)
     cur = conn.cursor()
 
     # Read schema from file
@@ -19,6 +19,10 @@ def create_schema():
 
 def migrate(file: str):
     DB_FILE = "jobs.db"
+
+    # check if db file exist, if not create file and create schema
+    if not os.path.exists(DB_FILE):
+        create_schema(DB_FILE)
 
     # Connect to SQLite
     conn = sqlite3.connect(DB_FILE)
@@ -76,3 +80,4 @@ def migrate_all():
 # order: create_schema > migrate_all
 # create_schema()
 # migrate_all()
+

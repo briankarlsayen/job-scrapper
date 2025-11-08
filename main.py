@@ -5,7 +5,7 @@ import subprocess
 import time
 from ranking import rank_jobs_by_skills
 from migration import migrate
-from utils import logger
+from utils.utils import logger
 import sys
 from pathlib import Path
 
@@ -16,6 +16,8 @@ today = date.today()
 formatted_date = today.strftime("%Y_%m_%d")
 
 # get/create the directory
+ss_folder_path = "screenshots"
+os.makedirs(ss_folder_path, exist_ok=True)
 folder_path = f"datas/{formatted_date}"
 os.makedirs(folder_path, exist_ok=True)
 

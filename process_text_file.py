@@ -1,5 +1,5 @@
 import re
-from utils import skill_extraction
+from utils.utils import skill_extraction
 from datetime import date
 
 today = date.today()

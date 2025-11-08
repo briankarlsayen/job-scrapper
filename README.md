@@ -5,7 +5,42 @@
 - scrape jobs from job boards daily(linkedin, jobstreet)
 - show the jobs that I can apply to
 
-TODOS
+### Install packages
+
+- using requirements.txt
+
+```
+pip install -r requirements.txt
+```
+
+- or manually, with spacy matching
+
+```
+pip install pandas selenium sqlite3 spacy bs4
+```
+
+```
+python -m spacy download en_core_web_sm
+```
+
+### Install chromedriver
+
+- note: update "/usr/bin/chromedriver" to match chromedriver path
+
+```
+sudo apt update
+sudo apt install chromium-browser chromium-chromedriver -y
+```
+
+### Run script
+
+```
+python main.py
+```
+
+### TODOS
+
+```
 [x] further filter by checking the job post requirements
 --- [x] pass the requirements and nice to the nlp filter
 --- [x] create a csv file, add requirements, requirement score(12/14), failed requirement(seo,java,php), nice to haves, nth score, failed nth, status(passed or failed)
@@ -47,11 +82,7 @@ TODOS
 --- [x] create cron job
 --- [x] handle missed job
 --- [x] create log when job triggered
-[ ] raspi transfer
---- [x] run script, fix dependencies
---- [ ] run as cronjob
---- [ ] handle missed jobs
-[ ] data analysis
+
 [x] logs
 --- [x] create logs on unsuccessful run
 --- [x] create on start/end run
@@ -65,50 +96,24 @@ BUGS
 [ ] Git not listed when Git/Github
 [x] test linkedin not equal number scraped, test for duplicate titles, lk not logged has duplicate jobs(sites problem issue)
 [x] handle if scraper failed, do not create a csv
-[ ] no db schema once installed, create a schema first before running main.py, create jobs.db > migrate schema > run main.py
+[x] no db schema once installed, create a schema first before running main.py, create jobs.db > migrate schema > run main.py
 [x] error on fetching url, handle error and create logs
-[x] error on linkedin, looping on fetching items
+[ ] error on linkedin, looping on fetching items
 --- [x] add progress meter
 --- [x] find out why it is looping, if found valid/difficult, just stop the process and save the scrapped items
 --- [x] Error in scraping: cannot unpack non-iterable NoneType object --- trace this error
+--- [ ] Error on unable to click job
 
 ENCHANCEMENT
-[ ] logging, add a global logs to show everyday run on all script
-[ ] add log for end scraping
+[x] logging, add a global logs to show everyday run on all script
+[x] add log for end scraping
 [ ] create a test file, for improvement checking
 [ ] employment type(full time, contract, part time)
 [ ] salary(if range then max/min)
 [ ] work arrangement(remote, onsite, hybrid)
-
-## INSTALL PACKAGES
-
-- using requirements.txt
-
-```
-pip install -r requirements.txt
-```
-
-- or manually, with spacy matching
-
-```
-pip install pandas selenium sqlite3 spacy bs4
-```
-
-```
-python -m spacy download en_core_web_sm
-```
-
-## INSTALL CHROMEDRIVER
-
-- note: update "/usr/bin/chromedriver" to match chromedriver path
-
-```
-sudo apt update
-sudo apt install chromium-browser chromium-chromedriver -y
-```
-
-## RUN SCRIPT
-
-```
-python main.py
+[ ] data analysis
+[ ] raspi transfer
+--- [x] run script, fix dependencies
+--- [ ] run as cronjob
+--- [ ] handle missed jobs
 ```

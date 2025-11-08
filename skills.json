@@ -105,10 +105,6 @@
     "Karma",
     "gRPC",
     "Airbyte",
-    "NetSuite",
-    "QuickBooks",
-    "HubSpot",
-    "Saleforce",
     "tRPC"
   ],
   "JavaScript Libraries": [
