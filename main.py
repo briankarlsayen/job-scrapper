@@ -10,7 +10,8 @@ import sys
 from pathlib import Path
 
 # run logger script
-logger()
+log_file_path=Path(__file__).resolve().parent
+logger(file_path=log_file_path)
 
 today = date.today()
 formatted_date = today.strftime("%Y_%m_%d")
@@ -77,12 +78,12 @@ for script in to_process_exist_list:
             time.sleep(1)  # optional delay before retry
     if not success:
         print(f"⚠️ Skipping {script} after 3 failed attempts")
-        logger(log_message=f"Scraping Failed: {script}, {error_message}")
+        logger(log_message=f"Scraping Failed: {script}, {error_message}", file_path=log_file_path)
     
 if not success_scripts:
     sys.exit(1)
 
-logger(log_message="Scraping Success")
+logger(log_message="Scraping Success", file_path=log_file_path)
 
 # READ data from created csv's
 def merge_csv_files():

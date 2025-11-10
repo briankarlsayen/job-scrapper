@@ -153,8 +153,8 @@ def log(message, file):
     with open(file, "a") as f:
         f.write(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] {message}\n")
 
-def logger(log_message=""):
-    log_file = Path(__file__).parent / "logger.log"
+def logger(log_message="", file_path=Path(__file__).parent):
+    log_file = file_path / "logger.log"
     
     source = sys.argv[1] if len(sys.argv) > 1 else "unknown"
     if not log_message:

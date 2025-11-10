@@ -111,9 +111,9 @@ ENCHANCEMENT
 [ ] employment type(full time, contract, part time)
 [ ] salary(if range then max/min)
 [ ] work arrangement(remote, onsite, hybrid)
-[ ] data analysis
 [ ] raspi transfer
 --- [x] run script, fix dependencies
 --- [ ] run as cronjob
 --- [ ] handle missed jobs
+[ ] data analysis, research on how to make sense of data(need to scrape longer first ---> 01-2026 task )
 ```
