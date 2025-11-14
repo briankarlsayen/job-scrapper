@@ -46,6 +46,8 @@ driver.set_window_size(1920, 1080)
 
 jobs = []
 scraped_job_len = 0
+duplicates = 0
+failed_job_click = 0
 seen_links = set()
 separator = SEPARATOR
 
@@ -144,6 +146,7 @@ def process_job_scrape(driver, reload=False):
         return
 
     duplicates = 0 
+    failed_job_click = 0
 
     # close login modal
     def close_modal(driver) -> bool:
@@ -255,7 +258,7 @@ def process_job_scrape(driver, reload=False):
 
     items = 0 
 
-    failed_job_click = 0
+    
 
     with Progress(
         SpinnerColumn(),
@@ -418,4 +421,6 @@ def create_job_folder(folder_name: str, file_name: str, text_content: str, csv_c
 create_job_folder(folder_name=formatted_date, file_name="linkedin", text_content="\n".join(job_requirement_list), csv_content=jobs)
 # TODO count duplicate job, unclickable job link
 linkedin_log(f"Processed {len(jobs)} out of {scraped_job_len} jobs")
+linkedin_log(f"{len(duplicates)} duplicate jobs")
+linkedin_log(f"{len(failed_job_click)} unprocessed jobs")
 
