@@ -10,7 +10,7 @@ import os
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
-from utils.utils import save_to_textfile, skill_extraction, validate_job_title
+from utils.utils import save_to_textfile, skill_extraction, save_screenshot
 from selenium.common.exceptions import NoSuchElementException, TimeoutException, WebDriverException
 from constant import BULLET_CHARS, SEPARATOR
 from typing import List
@@ -72,7 +72,8 @@ def extract_section(container) -> List[str]:
 def safe_find_element(parent, by: By, value: str):
     try:
         return parent.find_element(by, value)
-    except NoSuchElementException:
+    # except NoSuchElementException:
+    except:
         return None
 
 while True:
@@ -123,6 +124,11 @@ while True:
         #     break
 
         title_tag = safe_find_element(job, By.CSS_SELECTOR, "a[data-automation=jobTitle]")
+        # check if it redirected
+        if not title_tag:
+            print(f'Current  url: {driver.current_url}')
+            save_screenshot(driver)
+            continue
         title_text = title_tag.text.strip() if title_tag else None
         # if not validate_job_title(title_text):
         #     print('Not valid job :', title_text)
