@@ -422,7 +422,6 @@ def create_job_folder(folder_name: str, file_name: str, text_content: str, csv_c
     df.to_csv(csv_file_path, sep=';', index=False)
 
 create_job_folder(folder_name=formatted_date, file_name="linkedin", text_content="\n".join(job_requirement_list), csv_content=jobs)
-# TODO count duplicate job, unclickable job link
 linkedin_log(f"Processed {len(jobs)} out of {scraped_job_len} jobs")
 linkedin_log(f"{duplicates} duplicate jobs")
 linkedin_log(f"{failed_job_click} unprocessed jobs")

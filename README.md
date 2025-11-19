@@ -38,6 +38,21 @@ sudo apt install chromium-browser chromium-chromedriver -y
 python main.py
 ```
 
+### Using cron
+
+- using cron, run every 1400
+
+```
+0 14 * * * /bin/bash -c "cd /[main folder path]/ && source [python env folder path]/bin/activate && python job_scheduler.py"
+```
+
+- handle missed jobs, run after 60 sec on startup
+
+```
+@reboot /bin/bash -c "sleep 60 && cd /[main folder path]/ && source [python env folder path]/bin/activate && python job_scheduler.py --reboot"
+
+```
+
 ### TODOS
 
 ```
