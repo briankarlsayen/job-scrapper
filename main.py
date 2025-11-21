@@ -11,7 +11,6 @@ from pathlib import Path
 
 # run logger script
 log_file_path=Path(__file__).resolve().parent
-logger(file_path=log_file_path)
 
 today = date.today()
 formatted_date = today.strftime("%Y_%m_%d")

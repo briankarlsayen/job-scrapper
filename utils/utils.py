@@ -153,14 +153,22 @@ def log(message, file):
     with open(file, "a") as f:
         f.write(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] {message}\n")
 
+
+def detect_trigger_source():
+    # Reboot cron job: using a flag passed in cron
+    if "--reboot" in sys.argv:
+        return "REBOOT"
+
+    # Scheduled cron job (2pm)
+    if "CRON" in os.getenv("PATH", "") or not os.isatty(0):
+        return "CRON"
+
+    # Otherwise, manual execution
+    return "MANUAL"
+
 def logger(log_message="", file_path=Path(__file__).parent):
     log_file = file_path / "logger.log"
-    
-    source = sys.argv[1] if len(sys.argv) > 1 else "unknown"
-    if not log_message:
-        log(f"Script triggered by: {source}", log_file)
-    else:
-        log(log_message, log_file)
+    log(log_message, log_file)
 
 
 def linkedin_log(message, print_log=False):
