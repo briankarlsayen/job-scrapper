@@ -8,6 +8,7 @@ import sys
 from datetime import datetime, date
 import os
 import logging
+from config import BASE_DIR, SHOW_LOGS
 
 def add_space_around_slash(text: str) -> str:
     pascal_case_space = re.sub(r'(?<=[a-z])(?=[A-Z])', ' ', text) if re.match(r'^[a-z]', text) else text
@@ -171,7 +172,8 @@ def logger(log_message="", file_path=Path(__file__).parent):
     log(log_message, log_file)
 
 
-def linkedin_log(message, print_log=False):
+def linkedin_log(message, print_log=True):
+    return
     today = date.today()
     formatted_date = today.strftime("%Y_%m_%d")
     folder_path = f"logs/linkedin"
@@ -200,8 +202,45 @@ def format_time(seconds: float) -> str:
         return f"{hours:.1f}hr"
 
 def save_screenshot(driver, folder="screenshots"):
-    Path(folder).mkdir(parents=True, exist_ok=True)  # ✅ Ensure folder exists
+    Path(folder).mkdir(parents=True, exist_ok=True)
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     filename = f"{folder}/{timestamp}.png"
     driver.save_screenshot(filename)
     print(f"[DEBUG] Screenshot saved as: {filename}")
+
+def safe_remove(file_path: str | None):
+    if file_path and os.path.exists(file_path):
+        os.remove(file_path)
+
+def log_json(
+    log_dir: str, # main | linkedin | jobstreet
+    message: str,
+    level: str = "info", # error | info | warning
+    **extra
+):
+    dir_path = BASE_DIR / "logs/main"
+    match log_dir:
+        case "main":
+            dir_path = BASE_DIR / "logs/main"
+        case "linkedin":
+            dir_path = BASE_DIR / "logs/linkedin"
+        case "jobstreet":
+            dir_path = BASE_DIR / "logs/jobstreet"
+
+    Path(dir_path).mkdir(parents=True, exist_ok=True)
+
+    today = datetime.now().strftime("%Y_%m_%d")
+    log_file = Path(dir_path) / f"{today}.log"
+
+    log_entry = {
+        "timestamp": datetime.now().isoformat(),
+        "level": level.upper(),
+        "message": message,
+        **extra
+    }
+
+    with open(log_file, "a", encoding="utf-8") as f:
+        f.write(json.dumps(log_entry, ensure_ascii=False) + "\n")
+    
+    if SHOW_LOGS:
+        print(f"[{level.upper()}] {message}")

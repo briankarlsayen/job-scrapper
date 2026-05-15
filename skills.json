@@ -73,7 +73,8 @@
     "Webflow",
     "Replo",
     "Liquid",
-    "PWA"
+    "PWA",
+    "Electron"
   ],
   "APIs & Testing": [
     "SOAP",
@@ -134,7 +135,11 @@
     "MUI5",
     "NgRx",
     "Akita",
-    "TypeORM"
+    "TypeORM",
+    "Bloc",
+    "Provider",
+    "Riverpod",
+    "Dart"
   ],
   "Databases": [
     "SQL",
@@ -187,7 +192,6 @@
     "GitLab",
     "Vercel",
     "Cloudflare",
-    "Hubspot",
     "GTM",
     "CircleCI",
     "Prometheus",
@@ -250,7 +254,14 @@
     "Claude Code",
     "ElevenLabs",
     "Retell AI",
-    "Loveable"
+    "Loveable",
+    "Claude",
+    "Gemini",
+    "Xano",
+    "Airtable",
+    "Monday.com",
+    "Notion AI",
+    "Copy.ai"
   ],
   "Mobile Development": [
     "Android",
@@ -280,7 +291,11 @@
     "AIX",
     "SVN",
     "Tortoise",
-    "Adobe"
+    "Adobe",
+    "IntelliJ",
+    "XCode",
+    "VsCode",
+    "Bash"
   ],
   "Analytics": [
     "Google Analytics",
@@ -307,7 +322,8 @@
     "Web API",
     "Blazor",
     "Entity Framework",
-    "LINQ"
+    "LINQ",
+    "T-SQL"
   ],
   "Microsoft Cloud Ecosystem": [
     "Azure VM",
@@ -351,7 +367,8 @@
     "Maven",
     "Ant",
     "Eclipse",
-    "Liquibase"
+    "Liquibase",
+    "PowerMock"
   ],
   "Project & Workflow Tools": [
     "ClickUp",

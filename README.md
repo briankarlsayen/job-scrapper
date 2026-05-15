@@ -38,6 +38,17 @@ sudo apt install chromium-browser chromium-chromedriver -y
 python main.py
 ```
 
+### Using python env
+
+1. On terminal activate python env
+
+```
+source /[env folder name]/bin/activate
+```
+
+2. On VSCode click: alt + shift + p then search `Python: Select Interpreter` then find the env folder the click on the python3 file ex.( /[env folder/bin/python3])
+3. Click the play button to run the application
+
 ### Using cron
 
 - using cron, run every 1400
@@ -52,6 +63,10 @@ python main.py
 @reboot /bin/bash -c "sleep 60 && cd /[main folder path]/ && source [python env folder path]/bin/activate && python job_scheduler.py --reboot"
 
 ```
+
+### Testing
+
+- when testing check the comments that has --- TESTING ---
 
 ### TODOS
 
@@ -113,11 +128,11 @@ BUGS
 [x] handle if scraper failed, do not create a csv
 [x] no db schema once installed, create a schema first before running main.py, create jobs.db > migrate schema > run main.py
 [x] error on fetching url, handle error and create logs
-[ ] error on linkedin, looping on fetching items
+[x] error on linkedin, looping on fetching items
 --- [x] add progress meter
---- [x] find out why it is looping, if found valid/difficult, just stop the process and save the scrapped items
+--- [x] find out why it is looping, if found valid/difficult, just stop the process and save the scraped items
 --- [x] Error in scraping: cannot unpack non-iterable NoneType object --- trace this error
---- [ ] Error on unable to click job
+--- [x] Error on unable to click job
 
 ENCHANCEMENT
 [x] logging, add a global logs to show everyday run on all script
@@ -131,4 +146,10 @@ ENCHANCEMENT
 --- [ ] run as cronjob
 --- [ ] handle missed jobs
 [ ] data analysis, research on how to make sense of data(need to scrape longer first ---> 01-2026 task )
+[ ] improve logs
+--- [x] delete old logs --- <14days
+--- [x] delete old data --- <30days
+--- [x] delete screenshots --- <14days
+--- [ ] convert to json, add types (INFO, WARNING, ERROR)
+--- [ ] create logs/main, store logs on the main.py
 ```

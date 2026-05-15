@@ -26,9 +26,12 @@ from rich.progress import (
     TimeElapsedColumn,
     TimeRemainingColumn,
 )
-from utils.utils import linkedin_log, format_time
+from utils.utils import linkedin_log, format_time, log_json
+
+LOG_DIR = 'linkedin'
 
 linkedin_log('Start')
+log_json(log_dir=LOG_DIR, level='info', message=f"Start")
 options = Options()
 options.add_argument("--headless=new")
 options.add_argument("--disable-gpu")
@@ -103,16 +106,15 @@ def is_viewed_all_shown(driver) -> bool:
     return False
 
 def safe_click(element, retries=3, delay=2):
-    for attempt in range(retries):
+    for _ in range(retries):
         try:
             element.click()
-            return True  # Success
+            return True
         except (ElementClickInterceptedException, ElementNotInteractableException):
-            # Element not clickable, for retry
             time.sleep(delay)
         except NoSuchElementException:
-            # Element not found
             return False
+    log_json(log_dir=LOG_DIR, level='warning', message="Failed to click element after retries")
     linkedin_log("[ERROR] Failed to click element after retries.")
     return False
 
@@ -126,6 +128,7 @@ def process_job_scrape(driver, reload=False):
         return False
 
     try:
+        log_json(log_dir=LOG_DIR, level='info', message="Accessing website")
         driver.get(BASE_URL)
         wait = WebDriverWait(driver, 30)
     except TimeoutException as e:
@@ -152,16 +155,7 @@ def process_job_scrape(driver, reload=False):
 
     # close login modal
     def close_modal(driver) -> bool:
-        # simulate press ESC key
         ActionChains(driver).send_keys(Keys.ESCAPE).perform()
-
-        # click outside --- untested
-        # try:
-        #     # Try clicking outside first
-        #     driver.execute_script("document.elementFromPoint(0, 0).click();")
-        # except Exception:
-        #     pass
-
         retry_count = 10
         retry_failed = False
         while True:
@@ -169,28 +163,25 @@ def process_job_scrape(driver, reload=False):
                 modal_container = wait.until(
                     EC.presence_of_element_located((By.CSS_SELECTOR, "div.top-level-modal-container"))
                 )
-
                 overlay = safe_find_element(modal_container, By.CSS_SELECTOR, "div.modal__overlay")
                 if not overlay:
                     break
-
                 close_button = overlay.find_element(By.XPATH, "//button[contains(@class, 'modal__dismiss')]")
                 driver.execute_script("arguments[0].click();", close_button)
-
                 if retry_count <=0:
                     retry_failed = True
                     break
                 retry_count -= 1
                 time.sleep(3)
             except Exception as e:
+                log_json(log_dir=LOG_DIR, level='warning', message=f"No modal or not clickable, {e}")
                 linkedin_log('No modal or not clickable')
                 print("No modal or not clickable:", e)
         if retry_failed:
+            log_json(log_dir=LOG_DIR, level='warning', message="Retries failed, unable to close modal")
             linkedin_log('Retries failed, unable to close modal')
-            print('Retries failed, unable to close modal')
             return False
         else:
-            linkedin_log('Successfully closed modal')
             return True
 
     time.sleep(5)
@@ -245,8 +236,10 @@ def process_job_scrape(driver, reload=False):
         
         return success
     linkedin_log('Loading all jobs')
+    log_json(log_dir=LOG_DIR, level='info', message="Loading all jobs")
     success = load_all_jobs() 
     if not success:
+        log_json(log_dir=LOG_DIR, level='info', message="Processing partial jobs")
         linkedin_log('Processing partial jobs')
 
     job_cards = []
@@ -303,20 +296,20 @@ def process_job_scrape(driver, reload=False):
                 failed_job_click += 1
 
                 linkedin_log(f'Unable to click link, Title: {title_text}, Link: {raw_link}')
+                log_json(log_dir=LOG_DIR, level='warning', message=f'Unable to click link, Title: {title_text}, Link: {raw_link}')
                 save_screenshot(driver)
                 progress.advance(task)
                 is_modal_closed = close_modal(driver)
                 if not is_modal_closed:
-                    linkedin_log('A wild modal appeared! You have been defeated by a wild modal...')
-                else:
-                    linkedin_log('Successfully defeated a wild modal!')
+                    log_json(log_dir=LOG_DIR, level='warning', message=f'Unable to close modal')
+                    linkedin_log('Unable to close modal')
 
                 continue
             items += 1 
             time.sleep(8)
             
-            #  <---- FOR TESTING
-            # if items > 5: 
+            
+            # if items > 5: # UNBLOCK ON --- TESTING ---
             #     break
 
             current_url = driver.current_url
@@ -328,6 +321,7 @@ def process_job_scrape(driver, reload=False):
 
                 linkedin_log('Redirected to another link')
                 linkedin_log(f'Redirection link details {title_text} - {raw_link}')
+                log_json(log_dir=LOG_DIR, level='warning', message=f'Redirection link details {title_text} - {raw_link}')
                 break
 
             soup = BeautifulSoup(driver.page_source, "html.parser")        
@@ -375,6 +369,10 @@ def process_job_scrape(driver, reload=False):
                     f"Total tasks: {total_items} | "
                     f"Estimated time per task: {format_time(elapsed_first)}"
                 )
+                log_json(log_dir=LOG_DIR, level='info', message=f"Estimated total time: {format_time(estimated_total_time)} | "
+                    f"Total tasks: {total_items} | "
+                    f"Estimated time per task: {format_time(elapsed_first)}")
+
                 eta_logged = True
 
         
@@ -389,18 +387,20 @@ while retry:
         is_error = True
         retry = False
         linkedin_log(f'Error in scraping: {e}')
-        print('Error in scraping: ', e)
+        log_json(log_dir=LOG_DIR, level='error', message=f'Error in scraping: {e}')
 
 if len(jobs) == 0:
     if is_error:
         driver.quit()
         sys.exit(2)
         linkedin_log('Processing stop')
+        log_json(log_dir=LOG_DIR, level='error', message="Processing stop")
 
     driver.quit()
 
 if not job_requirement_list or not jobs:
     linkedin_log('Processing stop')
+    log_json(log_dir=LOG_DIR, level='error', message="Processing stop")
     sys.exit(1)
 
 def create_job_folder(folder_name: str, file_name: str, text_content: str, csv_content: list):
@@ -426,4 +426,5 @@ linkedin_log(f"Processed {len(jobs)} out of {scraped_job_len} jobs")
 linkedin_log(f"{duplicates} duplicate jobs")
 linkedin_log(f"{failed_job_click} unprocessed jobs")
 linkedin_log(f"{no_jd} no job description jobs")
-
+log_json(log_dir=LOG_DIR, level='info', message=f'Processed {len(jobs)} out of {scraped_job_len} jobs')
+log_json(log_dir=LOG_DIR, level='info', message=f'Duplicates: {duplicates} | Unprocessed: {failed_job_click} | No job description: {no_jd}')

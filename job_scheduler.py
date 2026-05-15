@@ -4,7 +4,7 @@ import os
 from datetime import datetime, time
 import sys
 import subprocess
-from utils.utils import log
+from utils.utils import log, log_json
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 FLAG_DIR = BASE_DIR
@@ -57,16 +57,24 @@ def mark_job_done():
 def run_job():
     subprocess.run(["python", JOB])
 
+def clear_log_file(file_path: str):
+    with open(file_path, "w"):
+        pass
+
 def main():
     trigger = detect_trigger_source()
+    clear_log_file(LOG_FILE)
+    log_json(log_dir='main', level='info', message=f"Script triggered by: {trigger}")
     log(f"Script triggered by: {trigger}", LOG_FILE)
 
     if trigger == "REBOOT" and now < time(14,0):
         return
 
-    lock_fd = acquire_lock()
+    acquire_lock()
 
-    if not should_run_today(LAST_RUN):
+    if not should_run_today(LAST_RUN): # BLOCK THIS ON TESTING
+        log_json(log_dir='main', level='info', message=f"Script already executed for today")
+        log(f"Script already executed for today", LOG_FILE)
         sys.exit(0)
 
     run_job()

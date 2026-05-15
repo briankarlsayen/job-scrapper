@@ -120,7 +120,9 @@ while True:
     for job in job_cards:
         time.sleep(1)
 
-        # if items >= 5: # limit to first 5
+
+        # if items >= 5:  # UNBLOCK ON --- TESTING ---
+        #     page = PAGE_LIMIT
         #     break
 
         title_tag = safe_find_element(job, By.CSS_SELECTOR, "a[data-automation=jobTitle]")
