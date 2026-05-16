@@ -94,6 +94,7 @@ ENCHANCEMENT
 --- [x] create logs/main, store logs on the main.py
 [x] handle errors
 --- [x] setup a system on sending errors (email, sms)
+[ ] merge databases functionality
 [ ] create a test file, for improvement checking
 [ ] employment type(full time, contract, part time)
 [ ] salary(if range then max/min)

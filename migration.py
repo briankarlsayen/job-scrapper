@@ -1,34 +1,28 @@
 import sqlite3
 import pandas as pd
 import os 
+from glob import glob
+
+DB_FILE = "jobs.db"
 
 def create_schema(db_path: str):
-    # Connect to SQLite DB (creates jobs.db if not exists)
     conn = sqlite3.connect(db_path)
     cur = conn.cursor()
 
-    # Read schema from file
     with open("schema.sql", "r") as f:
         schema = f.read()
 
-    # Execute schema
     cur.executescript(schema)
-
     conn.commit()
     conn.close()
 
 def migrate(file: str):
-    DB_FILE = "jobs.db"
-
-    # check if db file exist, if not create file and create schema
     if not os.path.exists(DB_FILE):
         create_schema(DB_FILE)
 
-    # Connect to SQLite
     conn = sqlite3.connect(DB_FILE)
     cur = conn.cursor()
 
-    # Load CSV
     df = pd.read_csv(file, delimiter=";")
 
     for _, row in df.iterrows():
@@ -74,6 +68,56 @@ def migrate_all():
                     print(f"'jobstreet.csv' found in: {dir_path}")
                     migrate(jobstreet_file)
 
+def merge_databases():
+    # This is for merging multiple databases
+    # Rename the db file ex. a.db, b.db
+    DB_FOLDER = "db_folder"
+    INDEX_DB = "index.db"
+    os.makedirs(DB_FOLDER, exist_ok=True)
+
+    if not os.path.exists(f"{DB_FOLDER}/{INDEX_DB}"):
+        create_schema(f"{DB_FOLDER}/{INDEX_DB}")
+
+    index_conn = sqlite3.connect(f"{DB_FOLDER}/{INDEX_DB}")
+    index_cur = index_conn.cursor()
+    db_files = glob(os.path.join(DB_FOLDER, "*.db"))
+    
+    for db_file in db_files:
+        conn = sqlite3.connect(db_file)
+        cur = conn.cursor()
+        cur.execute("SELECT title, company, location, skills, scraped_date, url FROM jobs")
+        rows = cur.fetchall()
+        for row in rows:
+            index_cur.execute("""
+            INSERT OR IGNORE INTO jobs
+            (title, company, location, skills, scraped_date, url)
+            VALUES (?, ?, ?, ?, ?, ?)
+            """, row)
+        conn.close()
+
+    index_conn.commit()
+    index_conn.close()
+
+    print("Merge complete.")
+
+def db_dummy_data_generate(db_path: str): # for testing merge_databases
+    conn = sqlite3.connect(db_path)
+    cur = conn.cursor()
+    jobs_data = [
+    ("Backend Developer", "Gemini", "Remote", "Python, Django", "2026-05-16", "https://job6.com"),
+    # ("Frontend Developer", "Meta", "USA", "React, JS", "2026-05-16", "https://job2.com"),
+    # ("Data Engineer", "Amazon", "Remote", "SQL, Python", "2026-05-16", "https://job3.com"),
+    ]
+    for data in jobs_data:
+        cur.execute("""
+        INSERT OR IGNORE INTO jobs
+        (title, company, location, skills, scraped_date, url)
+        VALUES (?, ?, ?, ?, ?, ?)
+        """, data)
+
+    conn.commit()
+    conn.close()
+
 
 # migrate(file="datas/2025_09_24/jobs.csv")
 
@@ -81,3 +125,5 @@ def migrate_all():
 # create_schema()
 # migrate_all()
 
+# db_dummy_data_generate("db_folder/b.db")
+# merge_databases()
