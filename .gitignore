@@ -12,3 +12,4 @@ last_run.txt
 logs/
 screenshots/
 .daily_job*
+.env

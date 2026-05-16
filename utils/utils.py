@@ -8,7 +8,8 @@ import sys
 from datetime import datetime, date
 import os
 import logging
-from config import BASE_DIR, SHOW_LOGS
+from config import BASE_DIR, SHOW_LOGS, SEND_LOGS
+from telegram_bot import send_bot_message
 
 def add_space_around_slash(text: str) -> str:
     pascal_case_space = re.sub(r'(?<=[a-z])(?=[A-Z])', ' ', text) if re.match(r'^[a-z]', text) else text
@@ -241,6 +242,10 @@ def log_json(
 
     with open(log_file, "a", encoding="utf-8") as f:
         f.write(json.dumps(log_entry, ensure_ascii=False) + "\n")
+
+    if SEND_LOGS and log_dir == 'main':
+    # if SEND_LOGS and log_dir == 'main' and level == 'error':
+        send_bot_message(message)
     
     if SHOW_LOGS:
         print(f"[{level.upper()}] {message}")

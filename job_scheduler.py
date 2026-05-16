@@ -68,6 +68,7 @@ def main():
     log(f"Script triggered by: {trigger}", LOG_FILE)
 
     if trigger == "REBOOT" and now < time(14,0):
+        log_json(log_dir='main', level='info', message=f"Script stopped, it's not time yet")
         return
 
     acquire_lock()
